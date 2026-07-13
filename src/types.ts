@@ -58,13 +58,13 @@ export type WorkspaceSection =
   | "discoveries"
   | "chief"
   | "opportunities"
-  | "session"
   | "music"
   | "prompt-studio"
   | "release-manifest"
   | "release-translation"
   | "album-production"
   | "track-workspace"
+  | "studio-library"
   | "settings";
 
 // The kinds of project Forge currently understands. A union type (instead
@@ -491,6 +491,7 @@ export interface PlannedTrack {
   projectId: string;
   title: string;
   createdAt: Date;
+  completedAt?: Date;
 }
 
 // An explicit, creator-declared fact: this saved Prompt Version was
@@ -714,5 +715,12 @@ export interface StudioResource {
   identityId: string;
   name: string;
   filePath: string;
+  createdAt: Date;
+}
+
+export interface StudioResourceAttachment {
+  id: string;
+  resourceId: string;
+  trackId: string;
   createdAt: Date;
 }

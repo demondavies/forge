@@ -4,12 +4,6 @@ import "./BlueprintWelcome.css";
 
 interface BlueprintWelcomeProps {
   blueprint: BlueprintDefinition;
-  // Reuses onBeginSession exactly as ProjectWorkspace's own header button
-  // and Music Workspace's own Creative Action already do — this is the
-  // Blueprint's "Creative Session entry point" preference, expressed as
-  // nothing more than calling that same, unmodified navigation one step
-  // earlier than a creator would otherwise have found it.
-  onBeginSession: () => void;
 }
 
 // Front-Loaded Guidance, literally: the one thing a Blueprint adds that a
@@ -22,7 +16,7 @@ interface BlueprintWelcomeProps {
 // "Blank Project" or for any ordinary return visit. Removing this
 // component entirely would leave Music Workspace and Creative Actions
 // exactly as capable as they are today; it adds a welcome, not a capability.
-function BlueprintWelcome({ blueprint, onBeginSession }: BlueprintWelcomeProps) {
+function BlueprintWelcome({ blueprint }: BlueprintWelcomeProps) {
   const companion = blueprint.emphasizedCompanionId
     ? COMPANION_ROLES.find((candidate) => candidate.id === blueprint.emphasizedCompanionId) ?? null
     : null;
@@ -39,9 +33,6 @@ function BlueprintWelcome({ blueprint, onBeginSession }: BlueprintWelcomeProps) 
         </p>
       )}
 
-      <button className="section-action-btn" onClick={onBeginSession}>
-        🎨 Begin Creative Session
-      </button>
     </div>
   );
 }

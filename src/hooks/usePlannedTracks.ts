@@ -7,9 +7,11 @@ function loadTracks(): PlannedTrack[] {
   try {
     const raw = localStorage.getItem(TRACKS_KEY);
     if (!raw) return [];
-    return (JSON.parse(raw) as Array<Record<string, unknown>>).map(
-      (t) => ({ ...t, createdAt: new Date(t.createdAt as string) }) as PlannedTrack,
-    );
+    return (JSON.parse(raw) as Array<Record<string, unknown>>).map((t) => ({
+      ...t,
+      createdAt: new Date(t.createdAt as string),
+      completedAt: t.completedAt ? new Date(t.completedAt as string) : undefined,
+    }) as PlannedTrack);
   } catch {
     return [];
   }
@@ -91,6 +93,18 @@ export function usePlannedTracks(activeIdentityId: string | null) {
     setTracks((current) => current.filter((track) => track.id !== id));
   }
 
+  function finishTrack(id: string) {
+    setTracks((current) =>
+      current.map((track) => (track.id === id ? { ...track, completedAt: new Date() } : track)),
+    );
+  }
+
+  function reopenTrack(id: string) {
+    setTracks((current) =>
+      current.map((track) => (track.id === id ? { ...track, completedAt: undefined } : track)),
+    );
+  }
+
   return {
     tracks: tracksForActiveIdentity,
     // The full, unfiltered list across every identity — kept for parity
@@ -98,5 +112,7 @@ export function usePlannedTracks(activeIdentityId: string | null) {
     allTracks: tracks,
     planTrack,
     removeTrack,
+    finishTrack,
+    reopenTrack,
   };
 }

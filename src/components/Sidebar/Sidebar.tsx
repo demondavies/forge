@@ -36,6 +36,7 @@ const navItems = [
   "Knowledge",
   "Assets",
   "Releases",
+  "🎧 Studio Library",
   "Discoveries",
   "Chief",
   "Opportunities",
@@ -57,6 +58,7 @@ const SECTION_BY_LABEL: Partial<Record<string, WorkspaceSection>> = {
   Opportunities: "opportunities",
   Companions: "companions",
   Settings: "settings",
+  "🎧 Studio Library": "studio-library",
 };
 
 // The permanent left sidebar: brand header, identity switcher, and nav links.

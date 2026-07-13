@@ -14,6 +14,7 @@ import type {
   Relationship,
   Release,
   StudioResource,
+  StudioResourceAttachment,
   WorkspaceSection,
 } from "../../types";
 import { WORKSPACE_SURFACE_DEFINITIONS } from "../../types";
@@ -27,7 +28,6 @@ import CompanionsView from "../Companion/CompanionsView";
 import DiscoveriesView from "../Discovery/DiscoveriesView";
 import ChiefView from "../Chief/ChiefView";
 import OpportunitiesView from "../Opportunity/OpportunitiesView";
-import CreativeSessionView from "../Session/CreativeSessionView";
 import MusicWorkspaceView from "../Music/MusicWorkspaceView";
 import CreativeActionsPanel from "../Actions/CreativeActionsPanel";
 import { bindCreativeAction } from "../../hooks/creativeActions";
@@ -43,6 +43,8 @@ import type { QueueExecutionInput, QueueExecutionResult } from "../../hooks/useS
 import AlbumProductionView from "../Album/AlbumProductionView";
 import type { PlanTrackInput, PlanTrackResult } from "../../hooks/usePlannedTracks";
 import TrackWorkspaceView from "../TrackWorkspace/TrackWorkspaceView";
+import ProducerCompanionPanel from "../TrackWorkspace/ProducerCompanionPanel";
+import { analyzeTrack } from "../../hooks/producerCompanion";
 import AttributedPromptsPanel from "../PromptAttribution/AttributedPromptsPanel";
 import QueueTrackGroupsView from "../TrackQueueAttribution/QueueTrackGroupsView";
 import TrackExecutionsPanel from "../TrackQueueAttribution/TrackExecutionsPanel";
@@ -52,12 +54,13 @@ import CandidateImportPanel, { type ImportCandidatesResult } from "../CandidateI
 import type { AttributePromptInput, AttributePromptResult } from "../../hooks/usePromptAttributions";
 import ReleaseManifestView from "../ReleaseManifest/ReleaseManifestView";
 import ReleaseTranslationView from "../Translation/ReleaseTranslationView";
-import MorningBriefingView from "../MorningBriefing/MorningBriefingView";
+import StudioDashboardView from "../Dashboard/StudioDashboardView";
 import type { CaptureKnowledgeInput, CaptureKnowledgeResult } from "../../hooks/useKnowledge";
 import ProviderSettingsView from "../Settings/ProviderSettingsView";
 import UpdaterPanel from "../Settings/UpdaterPanel";
 import BrowserAutomationStatusView from "../BrowserAutomation/BrowserAutomationStatusView";
 import BrowserSessionResolverView from "../BrowserSessionResolver/BrowserSessionResolverView";
+import StudioLibraryView from "../StudioLibrary/StudioLibraryView";
 import GenerateTrackPanel, { type GenerateResult } from "../GenerationRequest/GenerateTrackPanel";
 import GenerateAlbumPanel from "../GenerationRequest/GenerateAlbumPanel";
 import TrackWorkspaceSplitView from "../WorkspaceSurface/TrackWorkspaceSplitView";
@@ -83,8 +86,12 @@ interface WorkspaceProps {
   onAddAsset: () => void;
   onImportAudio: () => void;
   studioResources: StudioResource[];
+  attachments: StudioResourceAttachment[];
   onDeleteStudioResource: (id: string) => void;
   onRevealInExplorer: (filePath: string) => void;
+  onRenameStudioResource: (id: string, name: string) => void;
+  onAttachResource: (resourceId: string, trackId: string) => void;
+  onDetachResource: (resourceId: string, trackId: string) => void;
   selectedAsset: Asset | null;
   onSelectAsset: (id: string | null) => void;
   releases: Release[];
@@ -129,11 +136,6 @@ interface WorkspaceProps {
   // Vault Import instead (owned by App.tsx) — see KnowledgeView's
   // "+ Import Vault" button.
   onImportVault: () => void;
-  // Begins a Creative Session for one project (owned by App.tsx) — see
-  // ProjectWorkspace's "Begin Creative Session" button. Takes a project id
-  // rather than being a plain () => void like onOpenChief, since a session
-  // is always about one specific project chosen from wherever it's opened.
-  onBeginSession: (id: string) => void;
   // Opens Music Workspace for one project (owned by App.tsx) — see
   // ProjectWorkspace's "Open Music Workspace" button. Same shape as
   // onBeginSession, for the same reason.
@@ -183,6 +185,8 @@ interface WorkspaceProps {
   plannedTracks: PlannedTrack[];
   onPlanTrack: (input: PlanTrackInput) => PlanTrackResult;
   onRemoveTrack: (id: string) => void;
+  onFinishTrack: (id: string) => void;
+  onReopenTrack: (id: string) => void;
   // Opens Album Production for one project (owned by App.tsx) — see the
   // "Open Album Production" button rendered alongside Music Workspace
   // below. Same shape as onOpenPromptStudio/onOpenMusicWorkspace.
@@ -272,8 +276,12 @@ function Workspace({
   onAddAsset,
   onImportAudio,
   studioResources,
+  attachments,
   onDeleteStudioResource,
   onRevealInExplorer,
+  onRenameStudioResource,
+  onAttachResource,
+  onDetachResource,
   selectedAsset,
   onSelectAsset,
   releases,
@@ -300,7 +308,6 @@ function Workspace({
   onImport,
   onImportFolder,
   onImportVault,
-  onBeginSession,
   onOpenMusicWorkspace,
   activeBlueprint,
   onOpenPromptStudio,
@@ -313,6 +320,8 @@ function Workspace({
   plannedTracks,
   onPlanTrack,
   onRemoveTrack,
+  onFinishTrack,
+  onReopenTrack,
   onOpenAlbumProduction,
   selectedTrackId,
   onOpenTrackWorkspace,
@@ -382,40 +391,11 @@ function Workspace({
           onOpenAsset={onOpenAsset}
           onOpenKnowledgeEntry={onOpenKnowledgeEntry}
           onOpenRelease={onOpenRelease}
-          onBeginSession={onBeginSession}
           onOpenMusicWorkspace={onOpenMusicWorkspace}
         />
       )}
 
-      {/* selectedProjectId is guaranteed set here — beginSession (App.tsx)
-          always selects the project before switching to this section, the
-          same "select + switch section in one step" pattern every other
-          Context Everywhere destination already uses. Falls through to
-          nothing (rather than a crash) in the never-expected case it isn't. */}
-      {section === "session" &&
-        (() => {
-          const sessionProject = projects.find((candidate) => candidate.id === selectedProjectId);
-          if (!sessionProject) return null;
-
-          return (
-            <CreativeSessionView
-              project={sessionProject}
-              identities={identities}
-              projects={projects}
-              knowledgeEntries={knowledgeEntries}
-              assets={assets}
-              releases={releases}
-              captures={captures}
-              relationships={relationships}
-              activities={activities}
-              onOpenObject={onOpenObject}
-              onOpenKnowledgeEntry={onOpenKnowledgeEntry}
-              onEndSession={() => onOpenProject(sessionProject.id)}
-            />
-          );
-        })()}
-
-      {/* Same guard and "select + switch section" contract as "session"
+      {/* Same guard and "select + switch section" contract as above
           above — openMusicWorkspace (App.tsx) always selects the project
           first. The Creative Actions panel is rendered here, as a sibling
           above MusicWorkspaceView, rather than inside it — Music Workspace
@@ -441,7 +421,6 @@ function Workspace({
               bindCreativeAction("import-notes", onImport),
               bindCreativeAction("add-artwork", onAddAsset),
               bindCreativeAction("create-release", onCreateRelease),
-              bindCreativeAction("begin-creative-session", () => onBeginSession(musicProject.id)),
             ],
             // Purely a re-ordering of the exact same six actions above —
             // absent (activeBlueprint null) on every ordinary visit, which
@@ -461,7 +440,6 @@ function Workspace({
               {activeBlueprint && (
                 <BlueprintWelcome
                   blueprint={activeBlueprint}
-                  onBeginSession={() => onBeginSession(musicProject.id)}
                 />
               )}
               {/* Creative Pipeline — rendered here, as a sibling above
@@ -636,7 +614,6 @@ function Workspace({
                 onRemoveTrack={onRemoveTrack}
                 onQueueExecution={onQueueExecution}
                 onOpenPromptStudio={onOpenPromptStudio}
-                onBeginSession={onBeginSession}
                 onCaptureKnowledge={onCaptureKnowledge}
                 onOpenAsset={onOpenAsset}
                 onOpenKnowledgeEntry={onOpenKnowledgeEntry}
@@ -702,12 +679,31 @@ function Workspace({
           const openDefinition =
             WORKSPACE_SURFACE_DEFINITIONS.find((definition) => definition.id === workspaceSurfaceOpenId) ?? null;
 
+          const producerAnalysis = analyzeTrack(
+            track, trackProject, executions, candidates, knowledgeEntries, attributions,
+          );
+
+          // "Finish Track" eligibility: track has at least one Album Version
+          // candidate AND at least one approved candidate, via the attribution
+          // chain. Computed here so TrackWorkspaceView stays logic-free.
+          const trackAttributions = attributions.filter((a) => a.trackId === track.id);
+          const attributedVersionIds = new Set(trackAttributions.map((a) => a.promptVersionId));
+          const trackExecs = executions.filter(
+            (e) => e.projectId === trackProject.id && attributedVersionIds.has(e.promptVersionId),
+          );
+          const trackExecIds = new Set(trackExecs.map((e) => e.id));
+          const trackCandidates = candidates.filter((c) => trackExecIds.has(c.executionId));
+          const canFinish =
+            trackCandidates.some((c) => c.isAlbumVersion) &&
+            trackCandidates.some((c) => c.status === "Approved");
+
           return (
             <TrackWorkspaceSplitView
               openDefinition={openDefinition}
               onCloseSurface={onCloseWorkspaceSurface}
               mainContent={
                 <>
+                  {/* 1. Header + Studio Library + Advanced */}
                   <TrackWorkspaceView
                     track={track}
                     project={trackProject}
@@ -719,44 +715,25 @@ function Workspace({
                     relationships={relationships}
                     activities={activities}
                     executions={executions}
-                    candidates={candidates}
-                    attributions={attributions}
                     onOpenAsset={onOpenAsset}
                     onOpenKnowledgeEntry={onOpenKnowledgeEntry}
                     onOpenObject={onOpenObject}
                     onOpenPromptStudio={onOpenPromptStudio}
-                    onBeginSession={onBeginSession}
                     onCaptureKnowledge={onCaptureKnowledge}
-                    onImportAudio={onImportAudio}
                     studioResources={studioResources}
-                    onDeleteStudioResource={onDeleteStudioResource}
-                    onRevealInExplorer={onRevealInExplorer}
+                    attachments={attachments}
+                    onAttachResource={onAttachResource}
+                    onDetachResource={onDetachResource}
                     onQueueExecution={onQueueExecution}
                     onBack={() => onOpenAlbumProduction(trackProject.id)}
+                    canFinish={canFinish}
+                    onFinishTrack={() => onFinishTrack(track.id)}
+                    onReopenTrack={() => onReopenTrack(track.id)}
                   />
+                  {/* 2. Generate */}
                   <GenerateTrackPanel track={track} onGenerateTrack={onGenerateTrack} />
                   <ProductionConsoleView messages={consoleMessages} onClear={onClearConsole} />
-                  <AttributedPromptsPanel
-                    track={track}
-                    project={trackProject}
-                    knowledgeEntries={knowledgeEntries}
-                    attributions={attributions}
-                    onOpenKnowledgeEntry={onOpenKnowledgeEntry}
-                  />
-                  <TrackExecutionsPanel
-                    track={track}
-                    executions={executions}
-                    plannedTracks={plannedTracks}
-                    knowledgeEntries={knowledgeEntries}
-                    getAttributedTrackId={getAttributedTrackId}
-                    onOpenKnowledgeEntry={onOpenKnowledgeEntry}
-                  />
-                  <WorkspaceSurfaceLauncher
-                    openSurfaceId={workspaceSurfaceOpenId}
-                    lastOpenedSurfaceId={workspaceSurfaceLastOpenedId}
-                    onOpenSurface={onOpenWorkspaceSurface}
-                    onCloseSurface={onCloseWorkspaceSurface}
-                  />
+                  {/* 3. Listening Room */}
                   <CandidateImportPanel
                     track={track}
                     executions={executions}
@@ -782,6 +759,35 @@ function Workspace({
                     onOpenAsset={onOpenAsset}
                     onLog={onLog}
                   />
+                  {/* 4. Producer Companion */}
+                  <ProducerCompanionPanel analysis={producerAnalysis} trackTitle={track.title} />
+                  {/* 5. Advanced: prompt attribution, queue, workspace surface */}
+                  <details className="tw-advanced tw-advanced-siblings">
+                    <summary className="tw-advanced-toggle">Advanced</summary>
+                    <div className="tw-advanced-body">
+                      <AttributedPromptsPanel
+                        track={track}
+                        project={trackProject}
+                        knowledgeEntries={knowledgeEntries}
+                        attributions={attributions}
+                        onOpenKnowledgeEntry={onOpenKnowledgeEntry}
+                      />
+                      <TrackExecutionsPanel
+                        track={track}
+                        executions={executions}
+                        plannedTracks={plannedTracks}
+                        knowledgeEntries={knowledgeEntries}
+                        getAttributedTrackId={getAttributedTrackId}
+                        onOpenKnowledgeEntry={onOpenKnowledgeEntry}
+                      />
+                      <WorkspaceSurfaceLauncher
+                        openSurfaceId={workspaceSurfaceOpenId}
+                        lastOpenedSurfaceId={workspaceSurfaceLastOpenedId}
+                        onOpenSurface={onOpenWorkspaceSurface}
+                        onCloseSurface={onCloseWorkspaceSurface}
+                      />
+                    </div>
+                  </details>
                 </>
               }
             />
@@ -998,6 +1004,21 @@ function Workspace({
 
       {section === "companions" && <CompanionsView onOpenChief={onOpenChief} />}
 
+      {section === "studio-library" && (
+        <StudioLibraryView
+          resources={studioResources}
+          attachments={attachments}
+          projects={projects}
+          plannedTracks={plannedTracks}
+          onImportAudio={onImportAudio}
+          onDeleteStudioResource={onDeleteStudioResource}
+          onRevealInExplorer={onRevealInExplorer}
+          onRenameStudioResource={onRenameStudioResource}
+          onAttachResource={onAttachResource}
+          onDetachResource={onDetachResource}
+        />
+      )}
+
       {/* Provider Settings needs nothing from Workspace.tsx's own props —
           every registered provider and its configuration state is read
           straight from the Execution Provider Framework's own registry,
@@ -1020,7 +1041,8 @@ function Workspace({
       )}
 
       {section === "overview" && (
-        <MorningBriefingView
+        <StudioDashboardView
+          identity={identity}
           identities={identities}
           projects={projects}
           knowledgeEntries={knowledgeEntries}
@@ -1029,7 +1051,13 @@ function Workspace({
           captures={captures}
           relationships={relationships}
           activities={activities}
+          plannedTracks={plannedTracks}
+          candidates={candidates}
+          executions={executions}
+          studioResources={studioResources}
           onOpenObject={onOpenObject}
+          onOpenAlbumProduction={onOpenAlbumProduction}
+          onOpenTrackWorkspace={onOpenTrackWorkspace}
         />
       )}
     </main>

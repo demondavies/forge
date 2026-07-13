@@ -1,87 +1,71 @@
-import { useState } from "react";
-import type { StudioResource } from "../../types";
+import type { StudioResource, StudioResourceAttachment } from "../../types";
 
 interface StudioLibraryPanelProps {
   resources: StudioResource[];
-  onDelete: (id: string) => void;
-  onRevealInExplorer: (filePath: string) => void;
+  attachments: StudioResourceAttachment[];
+  trackId: string;
+  onAttach: (resourceId: string, trackId: string) => void;
+  onDetach: (resourceId: string, trackId: string) => void;
 }
 
-function StudioLibraryPanel({ resources, onDelete, onRevealInExplorer }: StudioLibraryPanelProps) {
-  const [confirmId, setConfirmId] = useState<string | null>(null);
+function StudioLibraryPanel({ resources, attachments, trackId, onAttach, onDetach }: StudioLibraryPanelProps) {
+  const attached = resources.filter((r) =>
+    attachments.some((a) => a.resourceId === r.id && a.trackId === trackId),
+  );
+  const unattached = resources.filter(
+    (r) => !attachments.some((a) => a.resourceId === r.id && a.trackId === trackId),
+  );
 
   return (
-    <div className="track-workspace-section">
-      <h3 className="track-workspace-section-title">🎛️ Studio Library</h3>
+    <div>
+      <div className="studio-library-section-header">
+        <p className="studio-library-section-label">Studio Library</p>
+      </div>
 
       {resources.length === 0 ? (
-        <p className="field-label">
-          No audio in your studio yet — click ⬇ Import Audio above to bring files in.
+        <p className="field-label" style={{ marginTop: 6 }}>
+          No audio in your library yet — visit 🎧 Studio Library to import files.
         </p>
       ) : (
-        <ul className="studio-library-list">
-          {resources.map((resource) => (
-            <li key={resource.id} className="studio-library-item">
-              <span className="studio-library-name" title={resource.filePath}>
-                🎵 {resource.name}
-              </span>
-
-              <div className="studio-library-actions">
-                {confirmId === resource.id ? (
-                  <>
-                    <span className="studio-library-confirm-label">
-                      Remove from studio?
-                    </span>
-                    <button
-                      className="secondary studio-library-btn studio-library-btn--danger"
-                      onClick={() => {
-                        onDelete(resource.id);
-                        setConfirmId(null);
-                      }}
-                    >
-                      Delete
-                    </button>
-                    <button
-                      className="secondary studio-library-btn"
-                      onClick={() => setConfirmId(null)}
-                    >
-                      Cancel
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button
-                      className="secondary studio-library-btn"
-                      disabled
-                      title="Coming in a future sprint"
-                    >
-                      Attach to Track
-                    </button>
-                    <button
-                      className="secondary studio-library-btn"
-                      disabled
-                      title="Coming in a future sprint"
-                    >
-                      Create Candidate
-                    </button>
-                    <button
-                      className="secondary studio-library-btn"
-                      onClick={() => onRevealInExplorer(resource.filePath)}
-                    >
-                      Reveal in Explorer
-                    </button>
-                    <button
-                      className="secondary studio-library-btn studio-library-btn--danger"
-                      onClick={() => setConfirmId(resource.id)}
-                    >
-                      Delete
-                    </button>
-                  </>
-                )}
-              </div>
-            </li>
-          ))}
-        </ul>
+        <>
+          {attached.length === 0 && (
+            <p className="field-label" style={{ marginTop: 6 }}>
+              No files attached to this track yet.
+            </p>
+          )}
+          <ul className="studio-library-list" style={{ marginTop: attached.length ? 8 : 4 }}>
+            {attached.map((resource) => (
+              <li key={resource.id} className="studio-library-item">
+                <span className="studio-library-name" title={resource.filePath}>
+                  🎵 {resource.name}
+                </span>
+                <div className="studio-library-actions">
+                  <button
+                    className="secondary studio-library-btn"
+                    onClick={() => onDetach(resource.id, trackId)}
+                  >
+                    ✓ Detach
+                  </button>
+                </div>
+              </li>
+            ))}
+            {unattached.map((resource) => (
+              <li key={resource.id} className="studio-library-item" style={{ opacity: 0.55 }}>
+                <span className="studio-library-name" title={resource.filePath}>
+                  🎵 {resource.name}
+                </span>
+                <div className="studio-library-actions">
+                  <button
+                    className="secondary studio-library-btn"
+                    onClick={() => onAttach(resource.id, trackId)}
+                  >
+                    Attach
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </>
       )}
     </div>
   );

@@ -39,7 +39,6 @@ interface ProjectsViewProps {
   onOpenAsset: (id: string) => void;
   onOpenKnowledgeEntry: (id: string) => void;
   onOpenRelease: (id: string) => void;
-  onBeginSession: (id: string) => void;
   onOpenMusicWorkspace: (id: string) => void;
 }
 
@@ -69,7 +68,6 @@ function ProjectsView({
   onOpenAsset,
   onOpenKnowledgeEntry,
   onOpenRelease,
-  onBeginSession,
   onOpenMusicWorkspace,
 }: ProjectsViewProps) {
   const selectedProject = projects.find((project) => project.id === selectedProjectId) ?? null;
@@ -106,7 +104,6 @@ function ProjectsView({
         onOpenAsset={onOpenAsset}
         onOpenKnowledgeEntry={onOpenKnowledgeEntry}
         onOpenRelease={onOpenRelease}
-        onBeginSession={() => onBeginSession(selectedProject.id)}
         onOpenMusicWorkspace={() => onOpenMusicWorkspace(selectedProject.id)}
       />
     );

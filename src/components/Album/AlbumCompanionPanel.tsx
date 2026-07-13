@@ -44,6 +44,8 @@ function AlbumCompanionPanel({ analysis }: AlbumCompanionPanelProps) {
               <StatRow label="Awaiting Review" value={progress.tracksAwaitingReview} />
               <StatRow label="Current Best ⭐" value={progress.tracksWithCurrentBest} />
               <StatRow label="Album Version 🎵" value={progress.tracksWithAlbumVersion} />
+              <StatRow label="Finished ✓" value={progress.tracksFinished} />
+              <StatRow label="Remaining" value={progress.plannedCount - progress.tracksFinished} />
             </div>
             {progress.tracksGenerated === 0 && (
               <p className="album-companion-note">

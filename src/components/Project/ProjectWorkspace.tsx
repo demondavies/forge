@@ -67,15 +67,8 @@ interface ProjectWorkspaceProps {
   onOpenAsset: (id: string) => void;
   onOpenKnowledgeEntry: (id: string) => void;
   onOpenRelease: (id: string) => void;
-  // Opens CreativeSessionView for this project (owned by Workspace.tsx —
-  // see App.tsx's beginSession). A session is entered from here, not from
-  // a permanent sidebar destination, since it's always about one specific
-  // project a creator has already chosen to work on.
-  onBeginSession: () => void;
   // Opens MusicWorkspaceView for this project (owned by Workspace.tsx —
-  // see App.tsx's openMusicWorkspace). Same contextual entry-point pattern
-  // as onBeginSession — a specialised composition, entered from the
-  // specific project it's about.
+  // see App.tsx's openMusicWorkspace).
   onOpenMusicWorkspace: () => void;
 }
 
@@ -107,7 +100,6 @@ function ProjectWorkspace({
   onOpenAsset,
   onOpenKnowledgeEntry,
   onOpenRelease,
-  onBeginSession,
   onOpenMusicWorkspace,
 }: ProjectWorkspaceProps) {
   // Which tab is showing. Lives here (not lifted to App.tsx) because it's
@@ -199,9 +191,6 @@ function ProjectWorkspace({
           <div className="project-workspace-actions">
             <button className="section-action-btn secondary" onClick={onOpenMusicWorkspace}>
               🎸 Open Music Workspace
-            </button>
-            <button className="section-action-btn" onClick={onBeginSession}>
-              🎨 Begin Creative Session
             </button>
           </div>
         </div>

@@ -88,9 +88,9 @@ function CandidateReviewPanel({
 
   return (
     <div className="candidate-review">
-      <h3 className="candidate-review-title">🗳️ Candidate Review</h3>
+      <h3 className="candidate-review-title">🎵 Listening Room</h3>
       <p className="candidate-review-subtitle">
-        Which version of "{track.title}" survives? You decide.
+        Listen to every take of "{track.title}" and decide what stays.
       </p>
 
       {comparisonCandidates.length > 0 ? (

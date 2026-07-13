@@ -2,7 +2,6 @@ import { useState } from "react";
 import type {
   Activity,
   Asset,
-  Candidate,
   Capture,
   CreativeExecution,
   Identity,
@@ -10,22 +9,20 @@ import type {
   ObjectRef,
   PlannedTrack,
   Project,
-  PromptAttribution,
   Relationship,
   Release,
   StudioResource,
+  StudioResourceAttachment,
 } from "../../types";
 import type { DiscoveryContext } from "../../hooks/relationshipDiscovery";
 import { resolveObjectRef } from "../../hooks/relationshipDiscovery";
 import { buildTrackWorkspace } from "../../hooks/trackWorkspace";
-import { analyzeTrack } from "../../hooks/producerCompanion";
 import type { QueueExecutionInput, QueueExecutionResult } from "../../hooks/useStudioQueue";
 import { formatDate } from "../../utils/formatDate";
 import AssetList from "../Asset/AssetList";
 import KnowledgeList from "../Knowledge/KnowledgeList";
 import CreativeHistorySection from "../History/CreativeHistorySection";
 import OpportunityCard from "../Opportunity/OpportunityCard";
-import ProducerCompanionPanel from "./ProducerCompanionPanel";
 import StudioLibraryPanel from "./StudioLibraryPanel";
 import "./TrackWorkspace.css";
 
@@ -40,30 +37,25 @@ interface TrackWorkspaceViewProps {
   relationships: Relationship[];
   activities: Activity[];
   executions: CreativeExecution[];
-  candidates: Candidate[];
-  attributions: PromptAttribution[];
   onOpenAsset: (id: string) => void;
   onOpenKnowledgeEntry: (id: string) => void;
   onOpenObject: (ref: ObjectRef) => void;
   onOpenPromptStudio: (projectId: string) => void;
-  onBeginSession: (projectId: string) => void;
   onCaptureKnowledge: () => void;
-  onImportAudio: () => void;
   studioResources: StudioResource[];
-  onDeleteStudioResource: (id: string) => void;
-  onRevealInExplorer: (filePath: string) => void;
+  attachments: StudioResourceAttachment[];
+  onAttachResource: (resourceId: string, trackId: string) => void;
+  onDetachResource: (resourceId: string, trackId: string) => void;
   onQueueExecution: (input: QueueExecutionInput) => QueueExecutionResult;
   onBack: () => void;
 }
 
-// "Everything currently known about this track" — and, true to this
-// sprint's own success criteria, almost no business logic of its own.
-// Every fact rendered here comes straight from buildTrackWorkspace (itself
-// just a thin composition over engines that already exist and are already
-// correct). Deleting this whole folder would leave Album Production,
-// Prompt Studio, Studio Queue, Creative Pipeline, and every other creative
-// system exactly as they are — none of them know this view exists, or
-// that a Planned Track exists at all.
+interface TrackFinishProps {
+  canFinish: boolean;
+  onFinishTrack: () => void;
+  onReopenTrack: () => void;
+}
+
 function TrackWorkspaceView({
   track,
   project,
@@ -75,22 +67,23 @@ function TrackWorkspaceView({
   relationships,
   activities,
   executions,
-  candidates,
-  attributions,
   onOpenAsset,
   onOpenKnowledgeEntry,
   onOpenObject,
   onOpenPromptStudio,
-  onBeginSession,
   onCaptureKnowledge,
-  onImportAudio,
   studioResources,
-  onDeleteStudioResource,
-  onRevealInExplorer,
+  attachments,
+  onAttachResource,
+  onDetachResource,
   onQueueExecution,
   onBack,
-}: TrackWorkspaceViewProps) {
+  canFinish,
+  onFinishTrack,
+  onReopenTrack,
+}: TrackWorkspaceViewProps & TrackFinishProps) {
   const [queueMessage, setQueueMessage] = useState<string | null>(null);
+  const [confirmingFinish, setConfirmingFinish] = useState(false);
 
   const discoveryContext: DiscoveryContext = {
     identities: [identity],
@@ -103,12 +96,7 @@ function TrackWorkspaceView({
   };
 
   const composition = buildTrackWorkspace(track, project, discoveryContext, activities, executions);
-  const producerAnalysis = analyzeTrack(track, project, executions, candidates, knowledgeEntries, attributions);
 
-  // "Queue Latest Prompt" queues the album's own most recent prompt
-  // version, honestly labelled as album-wide — the same choice Album
-  // Production's own recommended action already made, for the same reason
-  // (see hooks/trackWorkspace.ts's own opening comment).
   const latestAlbumPrompt =
     [...composition.albumPromptVersions].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0] ?? null;
 
@@ -124,159 +112,173 @@ function TrackWorkspaceView({
         ← Back to Album Production
       </button>
 
-      <div>
-        <h2 className="section-title">🎵 {track.title}</h2>
-        <p className="section-subtitle">Part of {project.name} — everything currently known about this track.</p>
-        <p className="track-workspace-planned-meta">Planned {formatDate(track.createdAt)}</p>
-      </div>
-
-      <div className="track-workspace-facts">
-        <span className="badge track-fact-badge track-fact-true">Planned</span>
-        <span className={`badge track-fact-badge ${composition.hasAudio ? "track-fact-true" : "track-fact-false"}`}>
-          {composition.hasAudio ? "Audio Available" : "No Audio Yet"}
-        </span>
-        <span className={`badge track-fact-badge ${composition.hasNotes ? "track-fact-true" : "track-fact-false"}`}>
-          {composition.hasNotes ? "Notes Available" : "No Notes Yet"}
-        </span>
-        <span
-          className={`badge track-fact-badge ${composition.hasAlbumPrompt ? "track-fact-true" : "track-fact-false"}`}
-        >
-          {composition.hasAlbumPrompt ? "Prompt Available (album)" : "No Prompt Yet"}
-        </span>
-        <span className={`badge track-fact-badge ${composition.hasQueued ? "track-fact-true" : "track-fact-false"}`}>
-          {composition.hasQueued ? "Queued (album)" : "Not Queued"}
-        </span>
-        <span
-          className={`badge track-fact-badge ${composition.hasCompletedExecution ? "track-fact-true" : "track-fact-false"}`}
-        >
-          {composition.hasCompletedExecution ? "Ready for Review" : "Not Ready Yet"}
-        </span>
-      </div>
-
-      <div className="track-workspace-actions">
-        <button className="secondary" onClick={() => onOpenPromptStudio(project.id)}>
-          🎛️ Open Prompt Studio
-        </button>
-        <button className="secondary" disabled={!latestAlbumPrompt} onClick={handleQueueLatestPrompt}>
-          🎼 Queue Latest Prompt
-        </button>
-        <button className="secondary" onClick={() => onBeginSession(project.id)}>
-          🎨 Begin Creative Session
-        </button>
-        <button className="secondary" onClick={onCaptureKnowledge}>
-          📝 Capture Knowledge
-        </button>
-        <button className="secondary" onClick={onImportAudio}>
-          ⬇ Import Audio
-        </button>
-      </div>
-      {queueMessage && <p className="field-label">{queueMessage}</p>}
-
-      <div className="track-workspace-section">
-        <h3 className="track-workspace-section-title">🎧 Related Audio</h3>
-        {composition.matchedAudio.length > 0 ? (
-          <AssetList
-            assets={composition.matchedAudio}
-            projects={[project]}
-            selectedAssetId={null}
-            onSelect={onOpenAsset}
-          />
-        ) : (
-          <p className="field-label">
-            No audio matched to this track yet — assets whose name mentions "{track.title}" will appear here.
-          </p>
-        )}
-      </div>
-
-      <div className="track-workspace-section">
-        <h3 className="track-workspace-section-title">🧠 Related Knowledge</h3>
-        {composition.matchedNotes.length > 0 ? (
-          <KnowledgeList
-            entries={composition.matchedNotes}
-            projects={[project]}
-            selectedEntryId={null}
-            onSelect={onOpenKnowledgeEntry}
-          />
-        ) : (
-          <p className="field-label">
-            No notes matched to this track yet — notes whose title mentions "{track.title}" will appear here.
-          </p>
-        )}
-      </div>
-
-      <div className="track-workspace-section">
-        <h3 className="track-workspace-section-title">🎼 Album-Level Prompt Versions</h3>
-        <p className="track-workspace-attribution-note">
-          Prompt Studio saves every version under one shared, project-wide name, so Forge can't yet tell which
-          track a saved prompt belongs to — these are this album's own prompt versions, not proven to be this
-          track's specifically.
-        </p>
-        {composition.albumPromptVersions.length > 0 ? (
-          <KnowledgeList
-            entries={composition.albumPromptVersions}
-            projects={[project]}
-            selectedEntryId={null}
-            onSelect={onOpenKnowledgeEntry}
-          />
-        ) : (
-          <p className="field-label">No prompt versions saved for this album yet.</p>
-        )}
-      </div>
-
-      {composition.albumExecutions.length > 0 && (
-        <div className="track-workspace-section">
-          <h3 className="track-workspace-section-title">⚙️ Album-Level Studio Queue</h3>
-          <p className="track-workspace-attribution-note">
-            {composition.albumExecutions.length} execution(s) queued for this album — not attributable to one
-            track.
-          </p>
+      {/* ── Header ─────────────────────────────────────────────────── */}
+      <div className="tw-header">
+        <h2 className="tw-title">🎵 {track.title}</h2>
+        <p className="tw-subtitle">{project.name} · Planned {formatDate(track.createdAt)}</p>
+        <div className="tw-status">
+          <span className={`badge track-fact-badge ${composition.hasAudio ? "track-fact-true" : "track-fact-false"}`}>
+            {composition.hasAudio ? "Audio Available" : "No Audio Yet"}
+          </span>
+          <span className={`badge track-fact-badge ${composition.hasCompletedExecution ? "track-fact-true" : "track-fact-false"}`}>
+            {composition.hasCompletedExecution ? "Ready to Listen" : "Not Generated Yet"}
+          </span>
         </div>
-      )}
+      </div>
 
-      <CreativeHistorySection entries={composition.history} />
-
-      {composition.opportunities.length > 0 && (
-        <div className="track-workspace-section">
-          <h3 className="track-workspace-section-title">💡 Opportunities</h3>
-          <ul className="track-workspace-opportunity-list">
-            {composition.opportunities.map((opportunity) => (
-              <OpportunityCard
-                key={opportunity.id}
-                opportunity={opportunity}
-                resolve={(ref) => resolveObjectRef(ref, discoveryContext)}
-                onOpenObject={onOpenObject}
-              />
-            ))}
-          </ul>
+      {/* ── Finish / Reopen ─────────────────────────────────────────── */}
+      {track.completedAt ? (
+        <div className="tw-finish-row">
+          <span className="badge tw-finished-badge">✓ Finished</span>
+          <button className="secondary tw-reopen-btn" onClick={onReopenTrack}>
+            Reopen
+          </button>
         </div>
-      )}
-
-      {composition.chiefObservations.length > 0 && (
-        <div className="track-workspace-section">
-          <h3 className="track-workspace-section-title">🧭 Chief's Observations</h3>
-          {composition.chiefObservations.map((observation) => (
-            <div
-              key={observation.kind === "discovery" ? observation.discovery.id : observation.opportunity.id}
-              className="track-chief-observation"
-            >
-              <span className={`badge track-chief-kind-badge track-chief-kind-${observation.kind}`}>
-                {observation.kind === "discovery" ? "Understanding" : "Possibility"}
-              </span>
-              <p className="track-chief-text">
-                {observation.kind === "discovery" ? observation.perspective.text : observation.text}
-              </p>
+      ) : canFinish ? (
+        confirmingFinish ? (
+          <div className="tw-finish-confirm">
+            <p className="tw-finish-confirm-text">
+              Finish {track.title}? This marks the track as complete for this album. You can still reopen it later.
+            </p>
+            <div className="tw-finish-confirm-actions">
+              <button className="secondary" onClick={() => setConfirmingFinish(false)}>
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  onFinishTrack();
+                  setConfirmingFinish(false);
+                }}
+              >
+                Finish Track
+              </button>
             </div>
-          ))}
-        </div>
-      )}
+          </div>
+        ) : (
+          <button className="tw-finish-btn" onClick={() => setConfirmingFinish(true)}>
+            ✅ Finish Track
+          </button>
+        )
+      ) : null}
 
+      {/* ── Studio Library ──────────────────────────────────────────── */}
       <StudioLibraryPanel
         resources={studioResources}
-        onDelete={onDeleteStudioResource}
-        onRevealInExplorer={onRevealInExplorer}
+        attachments={attachments}
+        trackId={track.id}
+        onAttach={onAttachResource}
+        onDetach={onDetachResource}
       />
 
-      <ProducerCompanionPanel analysis={producerAnalysis} trackTitle={track.title} />
+      {/* ── Advanced ────────────────────────────────────────────────── */}
+      <details className="tw-advanced">
+        <summary className="tw-advanced-toggle">Advanced</summary>
+        <div className="tw-advanced-body">
+
+          <div className="tw-adv-section">
+            <div className="track-workspace-actions">
+              <button className="secondary" onClick={() => onOpenPromptStudio(project.id)}>
+                🎛️ Prompt Studio
+              </button>
+              <button className="secondary" disabled={!latestAlbumPrompt} onClick={handleQueueLatestPrompt}>
+                🎼 Queue Latest Prompt
+              </button>
+              <button className="secondary" onClick={onCaptureKnowledge}>
+                📝 Capture Knowledge
+              </button>
+            </div>
+            {queueMessage && <p className="field-label">{queueMessage}</p>}
+          </div>
+
+          {composition.matchedAudio.length > 0 && (
+            <div className="tw-adv-section">
+              <p className="tw-adv-label">Related Audio</p>
+              <AssetList
+                assets={composition.matchedAudio}
+                projects={[project]}
+                selectedAssetId={null}
+                onSelect={onOpenAsset}
+              />
+            </div>
+          )}
+
+          {composition.matchedNotes.length > 0 && (
+            <div className="tw-adv-section">
+              <p className="tw-adv-label">Related Knowledge</p>
+              <KnowledgeList
+                entries={composition.matchedNotes}
+                projects={[project]}
+                selectedEntryId={null}
+                onSelect={onOpenKnowledgeEntry}
+              />
+            </div>
+          )}
+
+          {composition.albumPromptVersions.length > 0 && (
+            <div className="tw-adv-section">
+              <p className="tw-adv-label">Prompt Versions</p>
+              <KnowledgeList
+                entries={composition.albumPromptVersions}
+                projects={[project]}
+                selectedEntryId={null}
+                onSelect={onOpenKnowledgeEntry}
+              />
+            </div>
+          )}
+
+          {composition.albumExecutions.length > 0 && (
+            <div className="tw-adv-section">
+              <p className="tw-adv-label">Queue</p>
+              <p className="tw-adv-note">
+                {composition.albumExecutions.length} execution(s) queued for this album.
+              </p>
+            </div>
+          )}
+
+          {composition.history.length > 0 && (
+            <div className="tw-adv-section">
+              <p className="tw-adv-label">Creative History</p>
+              <CreativeHistorySection entries={composition.history} />
+            </div>
+          )}
+
+          {composition.opportunities.length > 0 && (
+            <div className="tw-adv-section">
+              <p className="tw-adv-label">Opportunities</p>
+              <ul className="track-workspace-opportunity-list">
+                {composition.opportunities.map((opportunity) => (
+                  <OpportunityCard
+                    key={opportunity.id}
+                    opportunity={opportunity}
+                    resolve={(ref) => resolveObjectRef(ref, discoveryContext)}
+                    onOpenObject={onOpenObject}
+                  />
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {composition.chiefObservations.length > 0 && (
+            <div className="tw-adv-section">
+              <p className="tw-adv-label">Chief's Observations</p>
+              {composition.chiefObservations.map((observation) => (
+                <div
+                  key={observation.kind === "discovery" ? observation.discovery.id : observation.opportunity.id}
+                  className="track-chief-observation"
+                >
+                  <span className={`badge track-chief-kind-badge track-chief-kind-${observation.kind}`}>
+                    {observation.kind === "discovery" ? "Understanding" : "Possibility"}
+                  </span>
+                  <p className="track-chief-text">
+                    {observation.kind === "discovery" ? observation.perspective.text : observation.text}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+
+        </div>
+      </details>
     </section>
   );
 }

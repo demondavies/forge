@@ -1,20 +1,15 @@
-/* The card shell, section-view/title/subtitle, .badge base pill,
-   .field-label, and .secondary button variant are all reused as-is
-   (Workspace.css) — see TrackWorkspaceView.tsx's static imports. Only
-   Track Workspace's own layout and fact-colour variants live here. */
+/* .badge, .section-view, .field-label, .secondary, .back-btn are all
+   reused as-is (Workspace.css) — only Track Workspace's own layout lives here. */
 
 .track-workspace {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 28px;
+  padding-bottom: 48px;
 }
 
-/* Track Workspace's one entry point — rendered in Workspace.tsx's
-   "album-production" section (see its own comment), below
-   AlbumProductionView. Deliberately plain: a title and one button per
-   planned track, nothing else, since every actual fact about a track
-   already lives in Album Production above it or in Track Workspace
-   itself. */
+/* ── Track Workspace entry list (Album Production → Track links) ── */
+
 .track-workspace-entry-list {
   display: flex;
   flex-direction: column;
@@ -23,9 +18,11 @@
 
 .track-workspace-entry-list-title {
   margin: 0;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .track-workspace-entry-btn {
@@ -35,21 +32,36 @@
   font-size: 13px;
 }
 
-.track-workspace-planned-meta {
-  margin: 4px 0 0;
-  font-size: 12px;
+/* ── Track header ──────────────────────────────────────────────── */
+
+.tw-header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tw-title {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.tw-subtitle {
+  margin: 0;
+  font-size: 13px;
   color: var(--color-text-secondary);
 }
 
-.track-workspace-facts {
+.tw-status {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
+  margin-top: 4px;
 }
 
-.track-fact-badge {
-  align-self: flex-start;
-}
+/* Status badges */
+.track-fact-badge { align-self: flex-start; }
 
 .track-fact-true {
   background: rgba(34, 197, 94, 0.12);
@@ -57,9 +69,57 @@
 }
 
 .track-fact-false {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.05);
   color: var(--color-text-secondary);
 }
+
+/* ── Finish / Reopen ───────────────────────────────────────────── */
+
+.tw-finish-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.tw-finished-badge {
+  background: rgba(34, 197, 94, 0.15);
+  color: #4ADE80;
+  font-size: 13px;
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+.tw-reopen-btn {
+  font-size: 13px;
+}
+
+.tw-finish-btn {
+  align-self: flex-start;
+  font-size: 14px;
+}
+
+.tw-finish-confirm {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tw-finish-confirm-text {
+  margin: 0;
+  font-size: 14px;
+  color: var(--color-text-primary);
+}
+
+.tw-finish-confirm-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* ── Actions (inside Advanced) ─────────────────────────────────── */
 
 .track-workspace-actions {
   display: flex;
@@ -67,68 +127,77 @@
   gap: 8px;
 }
 
-.track-workspace-section {
+/* ── Advanced collapse ─────────────────────────────────────────── */
+
+.tw-advanced {
+  margin-top: 4px;
+}
+
+.tw-advanced-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  list-style: none;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  padding: 6px 0;
+  user-select: none;
+}
+
+.tw-advanced-toggle::-webkit-details-marker { display: none; }
+.tw-advanced-toggle::marker { display: none; }
+
+.tw-advanced-toggle::before {
+  content: "▶";
+  font-size: 10px;
+  transition: transform 0.15s ease;
+  display: inline-block;
+}
+
+.tw-advanced[open] .tw-advanced-toggle::before {
+  transform: rotate(90deg);
+}
+
+.tw-advanced-body {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding-top: 16px;
+}
+
+.tw-adv-section {
   display: flex;
   flex-direction: column;
   gap: 8px;
-
-  padding-top: 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.track-workspace-section-title {
+.tw-adv-label {
   margin: 0;
-  font-size: 15px;
+  font-size: 11px;
   font-weight: 600;
-}
-
-.track-workspace-attribution-note {
-  margin: 0;
-  font-size: 12px;
-  line-height: 1.6;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
   color: var(--color-text-secondary);
 }
 
-.track-workspace-opportunity-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.track-chief-observation {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-
-  padding: 10px 12px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 10px;
-}
-
-.track-chief-kind-badge {
-  align-self: flex-start;
-}
-
-.track-chief-kind-discovery {
-  background: rgba(59, 130, 246, 0.12);
-  color: #60A5FA;
-}
-
-.track-chief-kind-opportunity {
-  background: rgba(234, 179, 8, 0.1);
-  color: #EAB308;
-}
-
-.track-chief-text {
+.tw-adv-note {
   margin: 0;
   font-size: 13px;
-  line-height: 1.6;
+  color: var(--color-text-secondary);
 }
 
-/* ── Studio Library ─────────────────────────────────────────── */
+/* Advanced (sibling panels) collapse in Workspace */
+.tw-advanced-siblings {
+  border: none;
+}
+
+.tw-advanced-siblings > .tw-advanced-toggle {
+  padding: 8px 0;
+}
+
+/* ── Studio Library panel (Track Workspace variant) ────────────── */
 
 .studio-library-list {
   list-style: none;
@@ -136,37 +205,42 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 
 .studio-library-item {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
 
-  padding: 10px 12px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
+.studio-library-item:last-child {
+  border-bottom: none;
 }
 
 .studio-library-name {
   font-size: 13px;
-  font-weight: 500;
   color: var(--color-text-primary);
-  word-break: break-all;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .studio-library-actions {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
   gap: 6px;
+  flex-shrink: 0;
 }
 
 .studio-library-btn {
-  padding: 4px 10px;
+  padding: 3px 8px;
   font-size: 12px;
-  border-radius: 6px;
+  border-radius: 5px;
 }
 
 .studio-library-btn--danger {
@@ -183,29 +257,39 @@
   color: var(--color-text-secondary);
 }
 
-/* ── Producer Companion ──────────────────────────────────────── */
+.studio-library-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.studio-library-section-label {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-secondary);
+}
+
+/* ── Producer Companion ──────────────────────────────────────────── */
 
 .producer-companion {
   display: flex;
   flex-direction: column;
   gap: 16px;
-
-  padding: 18px;
-  border: 1px solid rgba(251, 146, 60, 0.18);
-  border-radius: 12px;
-  background: rgba(251, 146, 60, 0.03);
-  margin-top: 8px;
 }
 
 .producer-companion-header {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
 }
 
 .producer-companion-title {
   margin: 0;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
 }
 
@@ -252,18 +336,18 @@
 .producer-companion-stats {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px 20px;
+  gap: 12px 24px;
 }
 
 .producer-companion-stat {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  min-width: 56px;
+  min-width: 48px;
 }
 
 .producer-companion-stat-value {
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 700;
   line-height: 1;
   color: var(--color-text-primary);
@@ -314,3 +398,48 @@
 .producer-companion-item--notes::before     { color: #A855F7; }
 .producer-companion-item--observation::before { color: #FB923C; }
 .producer-companion-item--suggestion::before  { color: #38BDF8; }
+
+/* ── Chief observations ─────────────────────────────────────────── */
+
+.track-workspace-opportunity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.track-chief-observation {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.track-chief-kind-badge { align-self: flex-start; }
+
+.track-chief-kind-discovery {
+  background: rgba(59, 130, 246, 0.12);
+  color: #60A5FA;
+}
+
+.track-chief-kind-opportunity {
+  background: rgba(234, 179, 8, 0.1);
+  color: #EAB308;
+}
+
+.track-chief-text {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+}
+
+/* ── Legacy / kept for sibling panels ──────────────────────────── */
+
+.track-workspace-attribution-note {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+}

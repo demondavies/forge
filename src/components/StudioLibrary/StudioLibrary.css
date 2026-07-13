@@ -1,0 +1,246 @@
+.studio-library-view {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 24px;
+  max-width: 800px;
+}
+
+.studio-library-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.studio-library-title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.studio-library-import-btn {
+  white-space: nowrap;
+}
+
+.studio-library-empty {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  padding: 32px 0;
+  text-align: center;
+}
+
+/* Resource list */
+.studio-library-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.studio-library-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.015);
+}
+
+.studio-library-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.studio-library-item-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1;
+}
+
+.studio-library-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.studio-library-name {
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.studio-library-rename-input {
+  font-size: 14px;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 6px;
+  padding: 2px 8px;
+  color: var(--color-text-primary);
+  min-width: 0;
+  flex: 1;
+}
+
+.studio-library-meta {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.studio-library-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.sl-btn {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.sl-btn:hover {
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.sl-btn--danger {
+  color: #F87171;
+  border-color: rgba(248, 113, 113, 0.25);
+}
+
+.sl-btn--danger:hover {
+  background: rgba(248, 113, 113, 0.08);
+}
+
+.sl-btn--confirm {
+  color: #F87171;
+  border-color: rgba(248, 113, 113, 0.4);
+  background: rgba(248, 113, 113, 0.06);
+  font-weight: 600;
+}
+
+.sl-delete-confirm {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sl-delete-label {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+/* Audio player */
+.studio-library-player {
+  width: 100%;
+  height: 32px;
+  accent-color: #60A5FA;
+}
+
+/* Attach cascade picker */
+.studio-library-attach-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  border: 1px solid rgba(96, 165, 250, 0.2);
+  border-radius: 8px;
+  background: rgba(96, 165, 250, 0.03);
+}
+
+.sl-picker-label {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.sl-picker-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.sl-picker-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  border: 1px solid transparent;
+}
+
+.sl-picker-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.sl-picker-item--attached {
+  color: #4ADE80;
+}
+
+.sl-picker-project {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  background: none;
+  color: var(--color-text-primary);
+  text-align: left;
+  width: 100%;
+}
+
+.sl-picker-project:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.sl-picker-back {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0 0 4px 0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.sl-picker-check {
+  font-size: 12px;
+  color: #4ADE80;
+}
+
+.sl-picker-empty {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  padding: 4px 8px;
+}

@@ -25,6 +25,7 @@ export interface AlbumProgressStats {
   tracksAwaitingReview: number;
   tracksWithCurrentBest: number;
   tracksWithAlbumVersion: number;
+  tracksFinished: number;
 }
 
 export interface AlbumCreativeActivity {
@@ -134,6 +135,7 @@ export function analyzeAlbum(
 
   // --- Production Progress ---
   const tracksWithAudio = album.tracks.filter((t) => t.hasAudio).length;
+  const tracksFinished = album.tracks.filter((t) => !!t.track.completedAt).length;
   const { generated, withApproved, awaitingReview, withCurrentBest, withAlbumVersion } = computeTrackMilestones(
     album,
     projectExecutions,
@@ -157,6 +159,14 @@ export function analyzeAlbum(
   // Each is a plain, specific fact supported directly by the data above.
   // None guesses at artistic intent.
   const observations: string[] = [];
+
+  if (tracksFinished > 0) {
+    observations.push(
+      tracksFinished === album.tracks.length
+        ? `All ${album.tracks.length} tracks are now complete.`
+        : `${tracksFinished} of ${album.tracks.length} tracks are now complete.`,
+    );
+  }
 
   const tracksNeverGenerated = album.tracks.length - generated;
   if (tracksNeverGenerated > 0 && album.tracks.length > 0) {
@@ -247,6 +257,7 @@ export function analyzeAlbum(
       tracksAwaitingReview: awaitingReview,
       tracksWithCurrentBest: withCurrentBest,
       tracksWithAlbumVersion: withAlbumVersion,
+      tracksFinished,
     },
     activity: {
       totalPromptVersions: album.promptVersionCount,

@@ -105,7 +105,7 @@ function App() {
   // logging wrapper here either, for the same reason: Activity is part of
   // the Creative Knowledge Engine, off-limits to extend this sprint, and
   // planning/removing a track isn't one of its existing ActivityTypes.
-  const { tracks: plannedTracks, planTrack, removeTrack } = usePlannedTracks(selectedIdentity?.id ?? null);
+  const { tracks: plannedTracks, planTrack, removeTrack, finishTrack, reopenTrack } = usePlannedTracks(selectedIdentity?.id ?? null);
 
   // Prompt Attribution's own state — the same reasoning as Studio Queue
   // and Album Production: a creator's own declared choice is real,
@@ -128,7 +128,15 @@ function App() {
   // "Asset Added" for every other caller too.
   const { candidates, addCandidate, addNote, approveCandidate, rejectCandidate, setCandidatePromotion } = useCandidates(selectedIdentity?.id ?? null);
 
-  const { studioResources, importResources, deleteResource: deleteStudioResource } = useStudioResources(selectedIdentity?.id ?? null);
+  const {
+    studioResources,
+    attachments,
+    importResources,
+    deleteResource: deleteStudioResource,
+    renameResource: renameStudioResource,
+    attachResource,
+    detachResource,
+  } = useStudioResources(selectedIdentity?.id ?? null);
 
   // Workspace Surface's own session state — not identity-scoped (see
   // useWorkspaceSurface.ts's own comment), the same reason
@@ -236,6 +244,18 @@ function App() {
   // Fire-and-forget — errors (e.g. file moved) surface as OS-level notices.
   function handleRevealInExplorer(filePath: string) {
     revealInExplorer(filePath);
+  }
+
+  function handleRenameStudioResource(id: string, name: string) {
+    renameStudioResource(id, name);
+  }
+
+  function handleAttachResource(resourceId: string, trackId: string) {
+    attachResource(resourceId, trackId);
+  }
+
+  function handleDetachResource(resourceId: string, trackId: string) {
+    detachResource(resourceId, trackId);
   }
 
   // Candidate Review's one cross-system moment: approving a candidate
@@ -537,17 +557,7 @@ function App() {
 
   // Begins a Creative Session for one project — the same "select + switch
   // section" shape as every openX helper above, just landing on "session"
-  // instead of that type's own list section. Reuses selectProject (no new
-  // state): "session" + selectedProjectId together are all
-  // CreativeSessionView needs to know which project it's for (see
-  // Workspace.tsx), and ending a session is just openProject again.
-  function beginSession(id: string) {
-    setActiveSection("session");
-    selectProject(id);
-  }
-
-  // Opens Music Workspace for one project — identical shape to
-  // beginSession, just landing on "music" instead. Reuses selectProject
+  // Opens Music Workspace for one project — reuses selectProject
   // for the same reason: "music" + selectedProjectId together are all
   // MusicWorkspaceView needs (see Workspace.tsx). Never touches
   // firstBlueprintVisit itself — this is the *ordinary* way in, used by
@@ -740,8 +750,12 @@ function App() {
         onAddAsset={() => setIsCreateAssetOpen(true)}
         onImportAudio={handleImportAudio}
         studioResources={studioResources}
+        attachments={attachments}
         onDeleteStudioResource={deleteStudioResource}
         onRevealInExplorer={handleRevealInExplorer}
+        onRenameStudioResource={handleRenameStudioResource}
+        onAttachResource={handleAttachResource}
+        onDetachResource={handleDetachResource}
         selectedAsset={selectedAsset}
         onSelectAsset={selectAsset}
         releases={releases}
@@ -768,7 +782,6 @@ function App() {
         onImport={() => setIsImportOpen(true)}
         onImportFolder={() => setIsFolderImportOpen(true)}
         onImportVault={() => setIsVaultImportOpen(true)}
-        onBeginSession={beginSession}
         onOpenMusicWorkspace={openMusicWorkspace}
         activeBlueprint={
           firstBlueprintVisit && selectedProject?.id === firstBlueprintVisit.projectId
@@ -785,6 +798,8 @@ function App() {
         plannedTracks={plannedTracks}
         onPlanTrack={planTrack}
         onRemoveTrack={removeTrack}
+        onFinishTrack={finishTrack}
+        onReopenTrack={reopenTrack}
         onOpenAlbumProduction={openAlbumProduction}
         selectedTrackId={selectedTrackId}
         onOpenTrackWorkspace={openTrackWorkspace}

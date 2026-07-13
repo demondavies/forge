@@ -40,7 +40,6 @@ interface AlbumProductionViewProps {
   onRemoveTrack: (id: string) => void;
   onQueueExecution: (input: QueueExecutionInput) => QueueExecutionResult;
   onOpenPromptStudio: (projectId: string) => void;
-  onBeginSession: (projectId: string) => void;
   onCaptureKnowledge: () => void;
   onOpenAsset: (id: string) => void;
   onOpenKnowledgeEntry: (id: string) => void;
@@ -74,7 +73,6 @@ function AlbumProductionView({
   onRemoveTrack,
   onQueueExecution,
   onOpenPromptStudio,
-  onBeginSession,
   onCaptureKnowledge,
   onOpenAsset,
   onOpenKnowledgeEntry,
@@ -204,7 +202,11 @@ function AlbumProductionView({
               <p className="album-track-planned-meta">Planned {formatDate(track.createdAt)}</p>
 
               <div className="album-track-facts">
-                <span className="badge album-fact-badge album-fact-true">Planned</span>
+                {track.completedAt ? (
+                  <span className="badge album-fact-badge album-fact-true">✓ Finished</span>
+                ) : (
+                  <span className="badge album-fact-badge album-fact-true">Planned</span>
+                )}
                 <span className={`badge album-fact-badge ${hasAudio ? "album-fact-true" : "album-fact-false"}`}>
                   {hasAudio ? "Audio Available" : "No Audio Yet"}
                 </span>
@@ -246,9 +248,6 @@ function AlbumProductionView({
                 </button>
                 <button className="secondary" disabled={!latestPromptVersion} onClick={handleQueueLatestPrompt}>
                   🎼 Queue Latest Prompt
-                </button>
-                <button className="secondary" onClick={() => onBeginSession(project.id)}>
-                  🎨 Begin Creative Session
                 </button>
                 <button className="secondary" onClick={onCaptureKnowledge}>
                   📝 Capture Knowledge

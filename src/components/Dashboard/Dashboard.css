@@ -1,0 +1,166 @@
+.studio-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 640px;
+}
+
+/* ── Greeting ──────────────────────────────────────────────────── */
+
+.dashboard-greeting {
+  padding-bottom: 4px;
+}
+
+.dashboard-greeting-text {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  letter-spacing: -0.01em;
+}
+
+/* ── Cards ─────────────────────────────────────────────────────── */
+
+.dashboard-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.dashboard-card--chief {
+  border-color: rgba(139, 92, 246, 0.2);
+  background: rgba(139, 92, 246, 0.04);
+}
+
+.dashboard-card-eyebrow {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-secondary);
+}
+
+.dashboard-card-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.dashboard-card-meta {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.dashboard-card-body {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-text-primary);
+  line-height: 1.5;
+}
+
+.dashboard-card-stats {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.dashboard-card-stats span {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.dashboard-card-action {
+  align-self: flex-start;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-accent, #8B5CF6);
+  background: none;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 6px;
+  padding: 5px 12px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.dashboard-card-action:hover {
+  background: rgba(139, 92, 246, 0.1);
+  border-color: rgba(139, 92, 246, 0.5);
+}
+
+.dashboard-card-badge-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 2px;
+}
+
+/* ── Object links ──────────────────────────────────────────────── */
+
+.dashboard-object-link {
+  align-self: flex-start;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-color: rgba(255, 255, 255, 0.15);
+  transition: color 0.15s;
+}
+
+.dashboard-object-link:hover {
+  color: var(--color-accent, #8B5CF6);
+}
+
+/* ── Today's Progress ──────────────────────────────────────────── */
+
+.dashboard-progress-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.dashboard-progress-list li {
+  font-size: 13px;
+  color: var(--color-text-primary);
+}
+
+.dashboard-progress-list li::before {
+  content: "✓ ";
+  color: var(--color-accent, #8B5CF6);
+  font-weight: 600;
+}
+
+/* ── Recent Activity ───────────────────────────────────────────── */
+
+.dashboard-activity-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dashboard-activity-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dashboard-activity-title {
+  font-size: 13px;
+  color: var(--color-text-primary);
+}

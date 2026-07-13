@@ -22,6 +22,9 @@ import type {
 import { analyzeCreativeHistory, type PromptCoachAnalysis } from "./promptCoach";
 
 export interface ProducerCompanionAnalysis {
+  // True when the creator has explicitly finished this track.
+  isFinished: boolean;
+
   // True when at least one PromptAttribution exists for this track —
   // without it, nothing below can be honestly attributed.
   hasAttributedData: boolean;
@@ -94,6 +97,31 @@ export function analyzeTrack(
     candidates,
     attributions,
   );
+
+  const isFinished = !!track.completedAt;
+
+  // When a track is finished, replace all analysis with a single message
+  // so the Producer stops pushing the creator toward more generations.
+  if (isFinished) {
+    return {
+      isFinished: true,
+      hasAttributedData: false,
+      trackPromptVersionCount: 0,
+      trackGenerationCount: 0,
+      totalCandidates: 0,
+      approvedCandidates: 0,
+      rejectedCandidates: 0,
+      pendingCandidates: 0,
+      pendingCandidateTitles: [],
+      noteThemes: [],
+      approvedPhrases: [],
+      rejectedPhrases: [],
+      isLooping: false,
+      observations: [`${track.title} is finished. Unless your vision changes, I'd leave it alone.`],
+      suggestions: [],
+      hasData: true,
+    };
+  }
 
   const hasAttributedData = trackAttributions.length > 0;
 
@@ -203,6 +231,7 @@ export function analyzeTrack(
     executions.some((e) => e.projectId === project.id);
 
   return {
+    isFinished: false,
     hasAttributedData,
     trackPromptVersionCount: trackAttributions.length,
     trackGenerationCount: trackExecutions.length,
