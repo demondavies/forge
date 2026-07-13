@@ -29,7 +29,7 @@
     "updater": {
       "active": true,
       "endpoints": [
-        "https://gist.githubusercontent.com/demondavies/e4d627926fa9e7502218b0c1f1027250/raw/latest.json"
+        "https://github.com/demondavies/forge/releases/latest/download/latest.json"
       ],
       "dialog": false,
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDlDOUZFNzIwNDlCNTk3QjIKUldTeWw3VkpJT2VmbkhoSFIwaXFpVUdKeHdJZGs0bzd4SnB6MXZVVE9Cb0ZIQTFSQW41dWRzdGsK"
