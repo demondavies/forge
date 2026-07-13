@@ -8,6 +8,8 @@
     "opener:default",
     "dialog:allow-open",
     "fs:allow-read-dir",
-    "fs:allow-read-text-file"
+    "fs:allow-read-text-file",
+    "updater:default",
+    "process:allow-restart"
   ]
 }

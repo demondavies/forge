@@ -13,6 +13,7 @@ import type {
   PromptAttribution,
   Relationship,
   Release,
+  StudioResource,
   WorkspaceSection,
 } from "../../types";
 import { WORKSPACE_SURFACE_DEFINITIONS } from "../../types";
@@ -54,6 +55,7 @@ import ReleaseTranslationView from "../Translation/ReleaseTranslationView";
 import MorningBriefingView from "../MorningBriefing/MorningBriefingView";
 import type { CaptureKnowledgeInput, CaptureKnowledgeResult } from "../../hooks/useKnowledge";
 import ProviderSettingsView from "../Settings/ProviderSettingsView";
+import UpdaterPanel from "../Settings/UpdaterPanel";
 import BrowserAutomationStatusView from "../BrowserAutomation/BrowserAutomationStatusView";
 import BrowserSessionResolverView from "../BrowserSessionResolver/BrowserSessionResolverView";
 import GenerateTrackPanel, { type GenerateResult } from "../GenerationRequest/GenerateTrackPanel";
@@ -79,7 +81,10 @@ interface WorkspaceProps {
   onSelectKnowledgeEntry: (id: string | null) => void;
   assets: Asset[];
   onAddAsset: () => void;
-  onAddAudioAsset: (projectId: string) => void;
+  onImportAudio: () => void;
+  studioResources: StudioResource[];
+  onDeleteStudioResource: (id: string) => void;
+  onRevealInExplorer: (filePath: string) => void;
   selectedAsset: Asset | null;
   onSelectAsset: (id: string | null) => void;
   releases: Release[];
@@ -265,7 +270,10 @@ function Workspace({
   onSelectKnowledgeEntry,
   assets,
   onAddAsset,
-  onAddAudioAsset,
+  onImportAudio,
+  studioResources,
+  onDeleteStudioResource,
+  onRevealInExplorer,
   selectedAsset,
   onSelectAsset,
   releases,
@@ -719,7 +727,10 @@ function Workspace({
                     onOpenPromptStudio={onOpenPromptStudio}
                     onBeginSession={onBeginSession}
                     onCaptureKnowledge={onCaptureKnowledge}
-                    onAddAudioAsset={() => onAddAudioAsset(trackProject.id)}
+                    onImportAudio={onImportAudio}
+                    studioResources={studioResources}
+                    onDeleteStudioResource={onDeleteStudioResource}
+                    onRevealInExplorer={onRevealInExplorer}
                     onQueueExecution={onQueueExecution}
                     onBack={() => onOpenAlbumProduction(trackProject.id)}
                   />
@@ -1004,6 +1015,7 @@ function Workspace({
               reason: the Browser Automation Framework (including its own
               Settings view) is off-limits to modify this sprint. */}
           <BrowserSessionResolverView />
+          <UpdaterPanel />
         </>
       )}
 

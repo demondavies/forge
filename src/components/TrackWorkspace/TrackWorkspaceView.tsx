@@ -13,6 +13,7 @@ import type {
   PromptAttribution,
   Relationship,
   Release,
+  StudioResource,
 } from "../../types";
 import type { DiscoveryContext } from "../../hooks/relationshipDiscovery";
 import { resolveObjectRef } from "../../hooks/relationshipDiscovery";
@@ -25,6 +26,7 @@ import KnowledgeList from "../Knowledge/KnowledgeList";
 import CreativeHistorySection from "../History/CreativeHistorySection";
 import OpportunityCard from "../Opportunity/OpportunityCard";
 import ProducerCompanionPanel from "./ProducerCompanionPanel";
+import StudioLibraryPanel from "./StudioLibraryPanel";
 import "./TrackWorkspace.css";
 
 interface TrackWorkspaceViewProps {
@@ -46,7 +48,10 @@ interface TrackWorkspaceViewProps {
   onOpenPromptStudio: (projectId: string) => void;
   onBeginSession: (projectId: string) => void;
   onCaptureKnowledge: () => void;
-  onAddAudioAsset: () => void;
+  onImportAudio: () => void;
+  studioResources: StudioResource[];
+  onDeleteStudioResource: (id: string) => void;
+  onRevealInExplorer: (filePath: string) => void;
   onQueueExecution: (input: QueueExecutionInput) => QueueExecutionResult;
   onBack: () => void;
 }
@@ -78,7 +83,10 @@ function TrackWorkspaceView({
   onOpenPromptStudio,
   onBeginSession,
   onCaptureKnowledge,
-  onAddAudioAsset,
+  onImportAudio,
+  studioResources,
+  onDeleteStudioResource,
+  onRevealInExplorer,
   onQueueExecution,
   onBack,
 }: TrackWorkspaceViewProps) {
@@ -158,8 +166,8 @@ function TrackWorkspaceView({
         <button className="secondary" onClick={onCaptureKnowledge}>
           📝 Capture Knowledge
         </button>
-        <button className="secondary" onClick={onAddAudioAsset}>
-          🎧 Add Audio Asset
+        <button className="secondary" onClick={onImportAudio}>
+          ⬇ Import Audio
         </button>
       </div>
       {queueMessage && <p className="field-label">{queueMessage}</p>}
@@ -261,6 +269,12 @@ function TrackWorkspaceView({
           ))}
         </div>
       )}
+
+      <StudioLibraryPanel
+        resources={studioResources}
+        onDelete={onDeleteStudioResource}
+        onRevealInExplorer={onRevealInExplorer}
+      />
 
       <ProducerCompanionPanel analysis={producerAnalysis} trackTitle={track.title} />
     </section>

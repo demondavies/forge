@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "forge-studio",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "identifier": "io.forgestudio.app",
   "build": {
     "beforeDevCommand": "npm run dev",
@@ -23,6 +23,16 @@
         "enable": true,
         "scope": ["$DOWNLOAD/**"]
       }
+    }
+  },
+  "plugins": {
+    "updater": {
+      "active": true,
+      "endpoints": [
+        "https://github.com/demondavies/forge/releases/latest/download/latest.json"
+      ],
+      "dialog": false,
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDI2MDI0RDA1NjVCRjVFQzYKUldUR1hyOWxCVTBDSnRJUzhuRytWemY1cjM2aGMxV2NLZGxhUkFteGE0T2VGdDV5VE5jM0ZWM0wK"
     }
   },
   "bundle": {

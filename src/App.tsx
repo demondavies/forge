@@ -12,7 +12,8 @@ import QuickCaptureModal from "./components/CommandPalette/QuickCaptureModal";
 import ConnectToModal from "./components/Relationships/ConnectToModal";
 import ImportModal from "./components/Import/ImportModal";
 import FolderImportModal from "./components/Import/FolderImportModal";
-import { pickFolderAsImportSources, pickVaultAsImportSources, pickAudioFile } from "./native/nativeFolderSource";
+import { pickFolderAsImportSources, pickVaultAsImportSources, pickAudioFiles, revealInExplorer } from "./native/nativeFolderSource";
+import { useStudioResources } from "./hooks/useStudioResources";
 // Side-effect only: registers every real Execution Provider this build
 // includes (today, just the Suno Service Adapter) into the Execution
 // Provider Framework's own registry. Nothing here is used directly by
@@ -127,6 +128,8 @@ function App() {
   // "Asset Added" for every other caller too.
   const { candidates, addCandidate, addNote, approveCandidate, rejectCandidate, setCandidatePromotion } = useCandidates(selectedIdentity?.id ?? null);
 
+  const { studioResources, importResources, deleteResource: deleteStudioResource } = useStudioResources(selectedIdentity?.id ?? null);
+
   // Workspace Surface's own session state — not identity-scoped (see
   // useWorkspaceSurface.ts's own comment), the same reason
   // activeBlueprint/firstBlueprintVisit below aren't either.
@@ -220,16 +223,19 @@ function App() {
     return result;
   }
 
-  // Audio Asset Import: opens a native file picker filtered to common audio
-  // formats, then creates an Audio Asset using the selected file. The
-  // project context comes from the track workspace's own project — passed
-  // in by the caller rather than guessed here, so this handler stays
-  // ignorant of which track or project is currently open.
-  async function handleAddAudioAsset(projectId: string) {
-    const filePath = await pickAudioFile();
-    if (!filePath) return;
-    const fileName = filePath.split(/[/\\]/).pop() ?? filePath;
-    handleCreateAsset({ name: fileName, type: "Audio", projectId, description: "", filePath });
+  // Studio Resource Import: opens a multi-select file picker, then registers
+  // every selected file as a StudioResource for the active identity. No
+  // project, no track, no album — audio enters the studio first.
+  async function handleImportAudio() {
+    const filePaths = await pickAudioFiles();
+    if (filePaths.length === 0) return;
+    importResources(filePaths);
+  }
+
+  // Reveal in Explorer: opens the system file manager at the given path.
+  // Fire-and-forget — errors (e.g. file moved) surface as OS-level notices.
+  function handleRevealInExplorer(filePath: string) {
+    revealInExplorer(filePath);
   }
 
   // Candidate Review's one cross-system moment: approving a candidate
@@ -732,7 +738,10 @@ function App() {
         onSelectKnowledgeEntry={selectEntry}
         assets={assets}
         onAddAsset={() => setIsCreateAssetOpen(true)}
-        onAddAudioAsset={handleAddAudioAsset}
+        onImportAudio={handleImportAudio}
+        studioResources={studioResources}
+        onDeleteStudioResource={deleteStudioResource}
+        onRevealInExplorer={handleRevealInExplorer}
         selectedAsset={selectedAsset}
         onSelectAsset={selectAsset}
         releases={releases}

@@ -73,3 +73,103 @@
 .provider-settings-save-btn {
   align-self: flex-start;
 }
+
+/* ── Updater ──────────────────────────────────────────────────── */
+
+.updater-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+  max-width: 520px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  margin-top: 8px;
+}
+
+.updater-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.updater-check-btn {
+  font-size: 12px;
+  padding: 4px 10px;
+}
+
+.updater-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  padding: 14px 16px;
+  border: 1px solid rgba(96, 165, 250, 0.25);
+  border-radius: 12px;
+  background: rgba(96, 165, 250, 0.04);
+}
+
+.updater-title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #60A5FA;
+}
+
+.updater-version {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.updater-notes {
+  margin: 4px 0 0;
+  padding: 0 0 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.updater-install-btn {
+  margin-top: 4px;
+  align-self: flex-start;
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  background: #60A5FA;
+  color: #0a0a0f;
+  border: none;
+  cursor: pointer;
+}
+
+.updater-install-btn:hover {
+  background: #93C5FD;
+}
+
+.updater-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.updater-progress-bar {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.updater-progress-fill {
+  height: 100%;
+  background: #60A5FA;
+  border-radius: 2px;
+  transition: width 0.2s ease;
+}
+
+.updater-error {
+  color: #F87171;
+}

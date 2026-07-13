@@ -700,3 +700,19 @@ export const WORKSPACE_SURFACE_DEFINITIONS: WorkspaceSurfaceDefinition[] = [
     icon: "🎵",
   },
 ];
+
+// A piece of audio that exists inside the creator's studio — imported from
+// disk and available for use, but not yet attached to any track, album, or
+// candidate. The studio floor, before anything earns a place on the record.
+//
+// Deliberately has no projectId, no trackId, no executionId: a Studio
+// Resource is not a creative decision. It is simply: "this audio is in
+// my studio." Everything that comes later (attaching to a track, promoting
+// to a candidate) is a separate, explicit creator choice.
+export interface StudioResource {
+  id: string;
+  identityId: string;
+  name: string;
+  filePath: string;
+  createdAt: Date;
+}

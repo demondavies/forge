@@ -1,4 +1,5 @@
 import { open } from "@tauri-apps/plugin-dialog";
+import { revealItemInDir } from "@tauri-apps/plugin-opener";
 import { readDir, readTextFile } from "@tauri-apps/plugin-fs";
 import { join } from "@tauri-apps/api/path";
 import type { ImportSource, ImportSourceFormat } from "../hooks/folderImport";
@@ -101,17 +102,24 @@ export async function pickFolderAsImportSources(): Promise<NativeFolderPickOutco
 }
 
 // ---- Audio File Picker ----
-// The one place in the app that opens a file (not folder) dialog. Filters
-// to the common lossless and lossy formats a creator is likely to have —
-// the same list the Suno adapter already recognises as audio.
-export async function pickAudioFile(): Promise<string | null> {
+// Opens a multi-select file dialog filtered to common audio formats. Returns
+// every selected path; returns an empty array if the creator cancels.
+export async function pickAudioFiles(): Promise<string[]> {
   const result = await open({
     directory: false,
-    multiple: false,
+    multiple: true,
     filters: [{ name: "Audio", extensions: ["mp3", "wav", "flac", "m4a", "ogg"] }],
   });
-  if (!result || Array.isArray(result)) return null;
-  return result;
+  if (!result) return [];
+  if (Array.isArray(result)) return result;
+  return [result];
+}
+
+// ---- Reveal in Explorer ----
+// Opens the system file manager and selects the given file — Windows
+// Explorer on Windows, Finder on macOS. Does not open the file itself.
+export async function revealInExplorer(filePath: string): Promise<void> {
+  await revealItemInDir(filePath);
 }
 
 // ---- Obsidian Vault Import ----
