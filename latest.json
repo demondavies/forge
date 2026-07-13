@@ -1,0 +1,11 @@
+{
+  "version": "0.2.0",
+  "notes": "Sprint 5: Finish Track workflow — explicit track completion, Producer Companion goes quiet, Album Companion tracks progress.",
+  "pub_date": "2026-07-13T00:00:00Z",
+  "platforms": {
+    "windows-x86_64": {
+      "url": "https://github.com/demondavies/forge/releases/download/v0.2.0/forge-studio_0.2.0_x64-setup.exe",
+      "signature": ""
+    }
+  }
+}
