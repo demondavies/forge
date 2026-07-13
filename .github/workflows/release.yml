@@ -7,9 +7,9 @@ on:
 
 jobs:
   release:
+    runs-on: windows-latest
     permissions:
       contents: write
-    runs-on: windows-latest
 
     steps:
       - uses: actions/checkout@v4
@@ -17,22 +17,67 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
 
       - uses: dtolnay/rust-toolchain@stable
 
-      - name: Install frontend dependencies
-        run: npm install
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
 
-      - uses: tauri-apps/tauri-action@v0
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Build and release
+        uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
-          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
           tagName: ${{ github.ref_name }}
-          releaseName: 'Working Studio ${{ github.ref_name }}'
-          releaseBody: |
-            • Studio Resource workflow
-            • Audio import fixes
+          releaseName: 'Forge ${{ github.ref_name }}'
+          releaseBody: ''
           releaseDraft: false
           prerelease: false
+
+      - name: Update latest.json Gist
+        env:
+          GIST_TOKEN: ${{ secrets.GIST_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+        shell: pwsh
+        run: |
+          $version = $env:TAG -replace '^v', ''
+          $pubDate = (Get-Date -Format "yyyy-MM-ddTHH:mm:ssZ")
+          $base = "https://github.com/demondavies/forge/releases/download/$env:TAG"
+          $sigUrl = "$base/forge-studio_${version}_x64-setup.exe.sig"
+          $sig = (Invoke-WebRequest -Uri $sigUrl -Headers @{
+            Authorization = "Bearer $env:GITHUB_TOKEN"
+          }).Content.Trim()
+
+          $manifest = @{
+            version  = $version
+            notes    = "Forge $env:TAG"
+            pub_date = $pubDate
+            platforms = @{
+              "windows-x86_64" = @{
+                url       = "$base/forge-studio_${version}_x64-setup.exe"
+                signature = $sig
+              }
+            }
+          } | ConvertTo-Json -Depth 5
+
+          $body = @{
+            files = @{
+              "latest.json" = @{ content = $manifest }
+            }
+          } | ConvertTo-Json -Depth 6
+
+          Invoke-RestMethod `
+            -Uri "https://api.github.com/gists/e4d627926fa9e7502218b0c1f1027250" `
+            -Method PATCH `
+            -Headers @{
+              Authorization  = "Bearer $env:GIST_TOKEN"
+              "Content-Type" = "application/json"
+            } `
+            -Body $body
