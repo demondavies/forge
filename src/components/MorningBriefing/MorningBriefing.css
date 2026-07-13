@@ -1,0 +1,39 @@
+/* The outer layout (.section-view), card shell (.placeholder-card), and
+   object-link/badge classes are all shared — see Workspace.css and
+   Discovery.css (reused verbatim, not redefined here). Only the briefing's
+   own section grouping lives here. */
+
+.briefing-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.briefing-section-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.briefing-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.briefing-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.briefing-item-text {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+}

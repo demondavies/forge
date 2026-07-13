@@ -1,0 +1,244 @@
+.workspace {
+  flex: 1; /* fill all remaining width next to the fixed sidebar */
+  padding: 56px 64px;
+  overflow-y: auto;
+}
+
+.workspace-empty {
+  color: var(--color-text-secondary);
+}
+
+.workspace-header {
+  margin-bottom: 40px;
+}
+
+.workspace-title {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 700;
+}
+
+.workspace-subtitle {
+  margin: 6px 0 0;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.placeholder-card {
+  padding: 24px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--color-surface);
+
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.placeholder-card:hover {
+  border-color: rgba(255, 138, 26, 0.35);
+  transform: translateY(-2px);
+}
+
+.card-icon {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 16px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 10px;
+  background: rgba(255, 138, 26, 0.12);
+  font-size: 18px;
+}
+
+.card-title {
+  margin: 0 0 6px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.card-description {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--color-text-secondary);
+}
+
+/* ---- Shared "section" chrome ----
+   Every section rendered inside the workspace (Projects, Knowledge, ...)
+   reuses this same layout wrapper, toolbar, heading, action button, and
+   empty state, so none of them redefine this CSS themselves. */
+
+.section-view {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.section-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.section-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* A one-line description under a section heading, for sections that don't
+   need a toolbar/action button (e.g. Companions — nothing there is created
+   by a creator, so there's no button to sit next to a heading). Generic on
+   purpose: any future section can reuse this the same way. */
+.section-subtitle {
+  margin: -12px 0 0;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+/* A toolbar with more than one action (e.g. Knowledge's "+ Import" next to
+   "+ Capture Knowledge") groups its buttons here instead of as direct
+   children of .section-toolbar, so justify-content: space-between still
+   only ever splits "heading" from "actions" — not each button individually. */
+.section-toolbar-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.section-action-btn {
+  padding: 10px 18px;
+  border-radius: 8px;
+  background: var(--color-accent);
+  color: var(--color-bg);
+  font-size: 14px;
+  font-weight: 600;
+  transition: opacity 0.15s ease, background-color 0.15s ease;
+}
+
+.section-action-btn:hover {
+  opacity: 0.9;
+}
+
+/* A second, quieter action alongside the primary one — same shape, less
+   emphasis, mirroring .modal-actions' own primary/.secondary distinction. */
+.section-action-btn.secondary {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--color-text-primary);
+}
+
+.section-action-btn.secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  opacity: 1;
+}
+
+.section-empty {
+  padding: 48px 24px;
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  text-align: center;
+}
+
+.section-empty-title {
+  margin: 0 0 6px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.section-empty-subtitle {
+  margin: 0;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+/* Small pill used for every status/source/type/project badge across every
+   feature (Project, Knowledge, Asset, ...). The base shape is defined once
+   here; each feature only adds its own colour variants on top of this. */
+.badge {
+  flex-shrink: 0;
+  padding: 3px 10px;
+  border-radius: 999px;
+
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+/* A badge that names a Project (e.g. on a Knowledge or Asset card) always
+   looks the same, regardless of which feature is showing it. */
+.project-badge {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--color-text-secondary);
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+/* ---- Shared "detail view" chrome ----
+   KnowledgeDetail/AssetDetail/ReleaseDetail/CaptureDetail (the "Context
+   Everywhere" surfaces reached by clicking a card) each show a header for
+   their own object, then a RelatedSection, then optionally a scoped
+   Recent Activity list. This mirrors ProjectWorkspace's own header shape
+   (.project-workspace-header etc. in Project.css) closely enough that a
+   shared set of classes here avoids four near-identical copies — Project
+   keeps its own bespoke classes since it also carries tabs, but everything
+   simpler reuses this. .back-btn (Project.css) is reused as-is; it was
+   already generic in name. */
+
+.detail-view {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.detail-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detail-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.detail-title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.detail-meta {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.detail-description {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+  white-space: pre-wrap;
+}
+
+/* The "Part of <Project>" line — a plain button so it's keyboard-
+   accessible, styled to read as a quiet link rather than a full button. */
+.detail-project-link {
+  align-self: flex-start;
+  font-size: 13px;
+  color: var(--color-accent);
+  transition: opacity 0.15s ease;
+}
+
+.detail-project-link:hover {
+  opacity: 0.8;
+}

@@ -1,0 +1,68 @@
+/* .badge is reused as-is (Workspace.css) — see
+   ExecutionProviderStatusView.tsx's static imports. Only this panel's own
+   layout and availability-colour variants live here. */
+
+.execution-provider-status {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  padding: 14px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.015);
+}
+
+.execution-provider-status-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.execution-provider-status-subtitle {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.execution-provider-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.execution-provider-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.execution-provider-label {
+  font-weight: 600;
+  margin-right: auto;
+}
+
+.execution-provider-can-execute {
+  color: var(--color-text-secondary);
+}
+
+.execution-provider-not-configured {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--color-text-secondary);
+}
+
+.execution-provider-available {
+  background: rgba(34, 197, 94, 0.12);
+  color: #4ADE80;
+}
+
+.execution-provider-unavailable {
+  background: rgba(239, 68, 68, 0.12);
+  color: #F87171;
+}

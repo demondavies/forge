@@ -1,0 +1,36 @@
+/* The card shell (padding/border/radius/background) comes from the shared
+   .placeholder-card class in Workspace.css — only the internal row layout
+   is defined here. */
+
+.activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.activity-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.activity-icon {
+  flex-shrink: 0;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.activity-title {
+  flex: 1;
+  font-size: 14px;
+}
+
+.activity-time {
+  flex-shrink: 0;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}

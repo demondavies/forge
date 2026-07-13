@@ -1,0 +1,35 @@
+/* The card shell (.placeholder-card), section headings (.section-title/
+   .section-subtitle/.section-empty), and the Chief/Opportunity list classes
+   (.chief-observations/.chief-observation/.opportunity-list, defined in
+   Chief.css/Opportunity.css and already globally available — see
+   Workspace.tsx's static imports) are all reused as-is. Only the session's
+   own layout lives here. */
+
+.creative-session {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.creative-session-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.creative-session-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Deliberately its own class rather than reusing MorningBriefing.css's
+   identically-styled .briefing-section-title by name — that class is
+   honestly named for Morning Briefing specifically, and this session isn't
+   one, even though the two happen to look the same today. */
+.creative-session-section-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}

@@ -1,0 +1,96 @@
+/* The card shell, section-view/title/subtitle, .badge base pill, and
+   .detail-project-link are all reused as-is (Workspace.css) — see
+   ReleaseManifestView.tsx's static imports. Only Release Manifest's own
+   layout and status-colour variants live here. */
+
+.release-manifest {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* The one entry point into Release Manifest — rendered in Workspace.tsx's
+   "releases" section (see its own comment), below ReleaseView rather than
+   inside ReleaseDetail. Reuses .section-action-btn's look, with a little
+   breathing room above it. */
+.release-manifest-entry-btn {
+  margin-top: 4px;
+}
+
+.manifest-completeness-banner {
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.manifest-completeness-complete {
+  background: rgba(34, 197, 94, 0.12);
+  color: #4ADE80;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.manifest-completeness-incomplete {
+  background: rgba(234, 179, 8, 0.1);
+  color: #EAB308;
+  border: 1px solid rgba(234, 179, 8, 0.25);
+}
+
+.manifest-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+}
+
+.manifest-field-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.manifest-field-label {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+/* Base pill shape comes from the shared .badge class in Workspace.css;
+   only the colour variants are defined here — same pattern as Release's
+   own .release-status-* variants. */
+.manifest-status-complete {
+  background: rgba(34, 197, 94, 0.12);
+  color: #4ADE80;
+}
+
+.manifest-status-missing {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--color-text-secondary);
+}
+
+.manifest-field-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.manifest-text-value {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.manifest-sound-style-value {
+  color: var(--color-text-secondary);
+}
+
+.manifest-generated-at {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}

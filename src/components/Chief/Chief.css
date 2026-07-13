@@ -1,0 +1,58 @@
+/* The card shell (.placeholder-card) and the discovery badge/confidence/
+   object-link classes are all shared — see Workspace.css and Discovery.css
+   (reused verbatim, not redefined here, since a Chief observation is a
+   Discovery + Perspective shown together, not a new kind of thing). Only
+   the observation list's own layout lives here. */
+
+.chief-observations {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.chief-observation {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.chief-observation-text {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.chief-observation-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Chief Coaching: the one visible marker distinguishing "what Forge
+   understands" (a Discovery) from "what Forge suggests is possible" (an
+   Opportunity) — reused as-is by MorningBriefingView's own "Chief's
+   Observations" section (see Chief.css's own load-order note in
+   Workspace.tsx: every section view is statically imported up front, so
+   its CSS is already available there without a second import). Deliberately
+   plainer language than the internal "Discovery"/"Opportunity" type names —
+   this is the one place a creator sees the distinction, not Forge's own
+   engineering vocabulary. */
+.chief-kind-badge {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.chief-kind-discovery {
+  background: rgba(59, 130, 246, 0.16);
+  color: #93c5fd;
+}
+
+.chief-kind-opportunity {
+  background: rgba(34, 197, 94, 0.16);
+  color: #86efac;
+}

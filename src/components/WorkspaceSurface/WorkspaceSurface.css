@@ -1,0 +1,125 @@
+/* .badge, .secondary, .field-label are all reused as-is (Workspace.css)
+   — see this folder's own static imports. Only Workspace Surface's own
+   layout lives here. */
+
+.workspace-surface-launcher {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.workspace-surface-launcher-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.workspace-surface-launcher-subtitle {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.workspace-surface-launcher-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.workspace-surface-launcher-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.workspace-surface-launcher-name {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.workspace-surface-launcher-btn {
+  flex-shrink: 0;
+}
+
+/* The panel itself — header + iframe, filling whatever the split view
+   below allots it. */
+.workspace-surface {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 480px;
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.workspace-surface-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.workspace-surface-title {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.workspace-surface-frame {
+  flex: 1;
+  width: 100%;
+  border: none;
+  background: #fff;
+}
+
+/* Track Workspace's split view — dockable in the sense that the surface
+   panel is always anchored to the right of Track Workspace's own content
+   rather than floating free; resizable via the draggable divider between
+   them (see TrackWorkspaceSplitView.tsx). Only rendered at all once a
+   surface is actually open — Graceful Disappearance covers the rest. */
+.track-workspace-split {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+}
+
+.track-workspace-split-main {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 280px;
+  overflow: auto;
+}
+
+.track-workspace-split-divider {
+  flex-shrink: 0;
+  width: 6px;
+  margin: 0 4px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.06);
+  cursor: col-resize;
+}
+
+.track-workspace-split-divider:hover,
+.track-workspace-split-divider.dragging {
+  background: var(--color-accent);
+}
+
+.track-workspace-split-surface {
+  flex-shrink: 0;
+  min-width: 320px;
+}

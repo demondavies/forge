@@ -1,0 +1,28 @@
+/* Identity-specific styling. Shared modal/field/button styles live in
+   Modal.css since every "Create X" modal reuses them. */
+
+.color-picker {
+  display: flex;
+  gap: 10px;
+}
+
+.color-swatch {
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+
+  border-radius: 50%;
+  border: 2px solid transparent;
+
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.color-swatch:hover {
+  transform: scale(1.1);
+}
+
+/* Selected state — exactly one swatch has this class at a time, since
+   accentColor in the form's state can only ever hold a single value. */
+.color-swatch.selected {
+  border-color: var(--color-text-primary);
+}

@@ -1,0 +1,68 @@
+.identity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  padding: 0 12px;
+}
+
+.identity-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+
+  color: var(--color-text-primary);
+  font-size: 14px;
+
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.identity-card:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Selected state — only one card should have this class at a time,
+   enforced by useIdentities() keeping a single "selectedId" value.
+   The border colour itself is set inline per-card (see IdentityCard.tsx)
+   so it matches that identity's own accent colour. */
+.identity-card.selected {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.identity-dot {
+  width: 10px;
+  height: 10px;
+  flex-shrink: 0;
+  border-radius: 50%;
+}
+
+.identity-name {
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.create-identity-btn {
+  margin: 10px 12px 0;
+  padding: 10px 12px;
+
+  border-radius: 10px;
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  text-align: left;
+
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.create-identity-btn:hover {
+  border-color: var(--color-accent);
+  color: var(--color-text-primary);
+}

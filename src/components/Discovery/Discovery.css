@@ -1,0 +1,112 @@
+/* The card shell (.placeholder-card) is shared — see Workspace.css. Only
+   layout specific to a discovery row lives here. */
+
+.discovery-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.discovery-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.discovery-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.discovery-confidence {
+  flex-shrink: 0;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.discovery-reason {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.discovery-objects {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.discovery-object-link {
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+
+  font-size: 12px;
+  color: var(--color-text-secondary);
+
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.discovery-object-link:hover {
+  border-color: var(--color-accent);
+  color: var(--color-text-primary);
+}
+
+/* Base pill shape comes from the shared .badge class in Workspace.css; a
+   muted, distinct colour per discovery type mirrors every other per-type
+   badge convention already in the app (source/type/platform/...). */
+.discovery-type-isolated-object {
+  background: rgba(239, 68, 68, 0.14);
+  color: #fca5a5;
+}
+
+.discovery-type-missing-context {
+  background: rgba(234, 179, 8, 0.16);
+  color: #fde68a;
+}
+
+.discovery-type-dense-cluster {
+  background: rgba(59, 130, 246, 0.16);
+  color: #93c5fd;
+}
+
+/* The Perspective Layer's picker + expanded results. The picker itself
+   reuses .pill-toggle/.pill-option (Modal.css) as-is — only the divider
+   above it and the expanded perspective blocks below are new here. */
+.discovery-perspectives {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.perspective-block {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.perspective-companion {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.perspective-text {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+}

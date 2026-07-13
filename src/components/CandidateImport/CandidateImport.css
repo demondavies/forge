@@ -1,0 +1,48 @@
+/* .badge, .secondary, .field-label are all reused as-is (Workspace.css)
+   — see CandidateImportPanel.tsx's static imports. Only Candidate
+   Import's own layout lives here. */
+
+.candidate-import {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.candidate-import-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.candidate-import-subtitle {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.candidate-import-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.candidate-import-label {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.candidate-import-btn {
+  align-self: flex-start;
+}
+
+.candidate-import-message {
+  margin: 0;
+}

@@ -1,0 +1,84 @@
+/* A connected vertical timeline — the visual difference between "history"
+   and "an activity log" is almost entirely this line. Layout wrapper
+   (.section-view) and heading (.section-title) are shared, see
+   Workspace.css; only the timeline itself lives here. */
+
+.history-timeline {
+  position: relative;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.history-entry {
+  position: relative;
+  display: flex;
+  gap: 14px;
+  padding-left: 4px;
+}
+
+/* The connecting line between one dot and the next. Positioned to start
+   just below this entry's own dot and reach down through the gap to meet
+   the next one — omitted on the last entry, since there's nothing after it
+   yet. */
+.history-entry:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  left: 17px;
+  top: 28px;
+  bottom: -20px;
+  width: 2px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.history-entry-dot {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: var(--color-surface);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+}
+
+/* A milestone reads as a slightly larger, accent-coloured stop on the same
+   line — not a different kind of row, just a more important one. */
+.history-entry.milestone .history-entry-dot {
+  width: 32px;
+  height: 32px;
+  border-color: var(--color-accent);
+  background: rgba(255, 138, 26, 0.14);
+  font-size: 15px;
+}
+
+.history-entry-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: 4px;
+}
+
+.history-entry-title {
+  font-size: 14px;
+  color: var(--color-text-primary);
+}
+
+.history-entry.milestone .history-entry-title {
+  font-weight: 700;
+}
+
+.history-entry-date {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}

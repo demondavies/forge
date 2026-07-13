@@ -1,0 +1,54 @@
+/* The card shell, section-view/title/subtitle, and .field-label are all
+   reused as-is (Workspace.css) — see ReleaseTranslationView.tsx's static
+   imports. Only Translation's own layout lives here. */
+
+.release-translation {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* The one entry point into Translation — rendered in Workspace.tsx's
+   "release-manifest" section (see its own comment), below
+   ReleaseManifestView. Reuses .section-action-btn's look, with a little
+   breathing room above it. */
+.release-translation-entry-btn {
+  margin-top: 4px;
+}
+
+.translation-boundary-note {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.translation-format-badge {
+  align-self: flex-start;
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.03);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+/* Deliberately looks nothing like an editable field — monospace, muted,
+   read-only — the same visual signal a code viewer gives that this is
+   output, not input. */
+.translation-output {
+  font-family: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--color-text-secondary);
+  resize: vertical;
+}
+
+.translation-actions {
+  display: flex;
+  gap: 10px;
+}

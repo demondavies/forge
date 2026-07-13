@@ -1,0 +1,38 @@
+/* .secondary, .field-label are reused as-is (Workspace.css) — see
+   BrowserSessionResolverView.tsx's static imports. Only this view's own
+   layout and result colour variants live here. */
+
+.browser-session-resolver {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+  max-width: 520px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.browser-session-resolver-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.browser-session-resolver-subtitle {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.browser-session-resolver-btn {
+  align-self: flex-start;
+}
+
+.browser-session-resolver-result-failed {
+  color: #F87171;
+}
+
+.browser-session-resolver-result-completed {
+  color: #4ADE80;
+}

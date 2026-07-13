@@ -1,0 +1,34 @@
+/* A calm, compact row — deliberately not styled as a toolbar with borders
+   or a heavy container, so it reads as "here's what's natural to do next"
+   rather than a menu of features. */
+
+.creative-actions-panel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.creative-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.03);
+
+  font-size: 13px;
+  color: var(--color-text-primary);
+
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.creative-action-btn:hover {
+  border-color: var(--color-accent);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.creative-action-icon {
+  font-size: 14px;
+}

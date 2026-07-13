@@ -1,0 +1,52 @@
+.production-console {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  max-width: 520px;
+  margin-top: 24px;
+  padding: 14px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.production-console-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.production-console-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.production-console-clear-btn {
+  font-size: 11px;
+  padding: 3px 8px;
+}
+
+.production-console-log {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.production-console-entry {
+  font-size: 12px;
+  font-family: ui-monospace, "Cascadia Code", monospace;
+  color: var(--color-text-secondary);
+  padding: 1px 0;
+  line-height: 1.5;
+}
+
+.production-console-entry--latest {
+  color: var(--color-text);
+}

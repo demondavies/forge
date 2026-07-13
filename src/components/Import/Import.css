@@ -1,0 +1,168 @@
+/* Shared form styling (.field, .field-label, .pill-toggle, .modal-actions,
+   .field-error) comes from Modal.css; the source badge reuses Knowledge.css's
+   .source-badge/.source-observation as-is. Only the preview's own layout
+   lives here. */
+
+.import-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+  padding-top: 4px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.import-preview-entry {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.import-preview-title {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.import-preview-body {
+  margin: 0;
+  max-height: 160px;
+  overflow-y: auto;
+
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--color-bg);
+
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+  white-space: pre-wrap;
+}
+
+.import-warnings {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.import-warning {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.import-warning::before {
+  content: "— ";
+}
+
+.import-suggestions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.import-suggestion-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.import-suggestion-label input[type="checkbox"] {
+  margin-top: 3px;
+  accent-color: var(--color-accent);
+}
+
+.import-suggestion-text {
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.import-suggestion-reason {
+  color: var(--color-text-secondary);
+}
+
+/* Batch Relationship Resolution: marks a suggestion whose target is
+   another queued item in this same batch, not yet a real Knowledge entry —
+   the one visual distinction between "already exists" and "awaiting
+   creation" this sprint's UX requires. */
+.import-pending-badge {
+  margin-left: 6px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-text-secondary);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* ---- Folder Import (FolderImportModal) ----
+   The "add a file" mini-form and the queued batch list. Each queued item's
+   own preview reuses ImportItemPreview/.import-preview above unchanged —
+   nothing batch-specific is redefined for it. */
+
+.import-batch-add {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+}
+
+.import-batch-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  padding-top: 4px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.import-batch-item {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--color-surface);
+}
+
+.import-batch-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.import-batch-item-approve {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.import-batch-item-approve input[type="checkbox"] {
+  accent-color: var(--color-accent);
+}
+
+.import-batch-item-label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.import-batch-item-remove {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  transition: color 0.15s ease;
+}
+
+.import-batch-item-remove:hover {
+  color: #ff8080;
+}

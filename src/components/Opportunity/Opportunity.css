@@ -1,0 +1,73 @@
+/* The card shell (.placeholder-card) is shared — see Workspace.css. Only
+   layout specific to an opportunity row lives here. Mirrors Discovery.css's
+   own structure closely (a sibling concern, not a reuse of its classes) —
+   kept as its own file so either can change independently. */
+
+.opportunity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.opportunity-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.opportunity-observation {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.opportunity-rationale {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+}
+
+.opportunity-objects {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.opportunity-object-link {
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+
+  font-size: 12px;
+  color: var(--color-text-secondary);
+
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.opportunity-object-link:hover {
+  border-color: var(--color-accent);
+  color: var(--color-text-primary);
+}
+
+/* Base pill shape comes from the shared .badge class in Workspace.css; a
+   muted, distinct colour per opportunity type mirrors every other per-type
+   badge convention already in the app. */
+.opportunity-type-unclassified-knowledge {
+  background: rgba(234, 179, 8, 0.16);
+  color: #fde68a;
+}
+
+.opportunity-type-release-missing-artwork {
+  background: rgba(168, 85, 247, 0.16);
+  color: #d8b4fe;
+}
+
+.opportunity-type-isolated-work {
+  background: rgba(239, 68, 68, 0.14);
+  color: #fca5a5;
+}

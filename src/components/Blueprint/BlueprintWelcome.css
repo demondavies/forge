@@ -1,0 +1,23 @@
+/* The card shell (.placeholder-card) and action button (.section-action-btn)
+   are shared — see Workspace.css. Only this welcome's own text layout
+   lives here. */
+
+.blueprint-welcome {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.blueprint-welcome-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.blueprint-welcome-companion {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+}

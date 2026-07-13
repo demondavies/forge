@@ -1,0 +1,261 @@
+/* The card shell, section-view/title/subtitle, .badge base pill,
+   .field-label, and .secondary button variant are all reused as-is
+   (Workspace.css) — see TrackWorkspaceView.tsx's static imports. Only
+   Track Workspace's own layout and fact-colour variants live here. */
+
+.track-workspace {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Track Workspace's one entry point — rendered in Workspace.tsx's
+   "album-production" section (see its own comment), below
+   AlbumProductionView. Deliberately plain: a title and one button per
+   planned track, nothing else, since every actual fact about a track
+   already lives in Album Production above it or in Track Workspace
+   itself. */
+.track-workspace-entry-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.track-workspace-entry-list-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.track-workspace-entry-btn {
+  align-self: flex-start;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.track-workspace-planned-meta {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.track-workspace-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.track-fact-badge {
+  align-self: flex-start;
+}
+
+.track-fact-true {
+  background: rgba(34, 197, 94, 0.12);
+  color: #4ADE80;
+}
+
+.track-fact-false {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--color-text-secondary);
+}
+
+.track-workspace-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.track-workspace-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.track-workspace-section-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.track-workspace-attribution-note {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+}
+
+.track-workspace-opportunity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.track-chief-observation {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+}
+
+.track-chief-kind-badge {
+  align-self: flex-start;
+}
+
+.track-chief-kind-discovery {
+  background: rgba(59, 130, 246, 0.12);
+  color: #60A5FA;
+}
+
+.track-chief-kind-opportunity {
+  background: rgba(234, 179, 8, 0.1);
+  color: #EAB308;
+}
+
+.track-chief-text {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* ── Producer Companion ──────────────────────────────────────── */
+
+.producer-companion {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  padding: 18px;
+  border: 1px solid rgba(251, 146, 60, 0.18);
+  border-radius: 12px;
+  background: rgba(251, 146, 60, 0.03);
+  margin-top: 8px;
+}
+
+.producer-companion-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.producer-companion-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.producer-companion-subtitle {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.producer-companion-empty {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.producer-companion-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.producer-companion-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.producer-companion-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.producer-companion-section-label {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.producer-companion-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+}
+
+.producer-companion-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 56px;
+}
+
+.producer-companion-stat-value {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--color-text-primary);
+}
+
+.producer-companion-stat-label {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+}
+
+.producer-companion-pattern-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.producer-companion-pattern-label {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.producer-companion-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.producer-companion-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.producer-companion-item::before {
+  content: "•";
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.producer-companion-item--approved::before  { color: #4ADE80; }
+.producer-companion-item--rejected::before  { color: #F87171; }
+.producer-companion-item--notes::before     { color: #A855F7; }
+.producer-companion-item--observation::before { color: #FB923C; }
+.producer-companion-item--suggestion::before  { color: #38BDF8; }

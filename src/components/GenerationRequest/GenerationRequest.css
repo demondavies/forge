@@ -1,0 +1,19 @@
+/* .field-label is reused as-is (Workspace.css) — see
+   GenerateTrackPanel.tsx/GenerateAlbumPanel.tsx's static imports. Only
+   this panel's own layout lives here. */
+
+.generation-request {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+
+  margin-top: 4px;
+}
+
+.generation-request-btn {
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+}

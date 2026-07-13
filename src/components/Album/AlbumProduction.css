@@ -1,0 +1,298 @@
+/* The card shell, section-view/title/subtitle, .badge base pill,
+   .field-label, and .secondary button variant are all reused as-is
+   (Workspace.css) — see AlbumProductionView.tsx's static imports. Only
+   Album Production's own layout and fact-colour variants live here. */
+
+.album-production {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* The one entry point into Album Production — rendered in Workspace.tsx's
+   "music" section (see its own comment), beside Prompt Studio's own entry
+   button. Reuses .creative-action-btn's look, with a little breathing
+   room before whatever's rendered next. */
+.album-production-entry-btn {
+  margin-bottom: 4px;
+}
+
+.album-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+
+  padding: 14px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.album-summary-fact {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.album-fact-badge {
+  align-self: flex-start;
+}
+
+.album-fact-true {
+  background: rgba(34, 197, 94, 0.12);
+  color: #4ADE80;
+}
+
+.album-fact-false {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--color-text-secondary);
+}
+
+.album-fact-link {
+  align-self: flex-start;
+  font-size: 13px;
+  color: var(--color-accent);
+  text-decoration: underline;
+  font-family: inherit;
+}
+
+.album-attribution-note {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+}
+
+.album-plan-track {
+  display: flex;
+  gap: 10px;
+}
+
+.album-plan-track-input {
+  flex: 1;
+}
+
+.album-track-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.album-track-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+}
+
+.album-track-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.album-track-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.album-track-remove-btn {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.album-track-planned-meta {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.album-track-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.album-track-matches {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.album-track-match-btn {
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.03);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.album-track-match-btn:hover {
+  border-color: var(--color-accent);
+  color: var(--color-text-primary);
+}
+
+.album-track-release-note {
+  color: var(--color-text-secondary);
+}
+
+.album-track-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+/* ── Album Companion ─────────────────────────────────────────── */
+
+.album-companion {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  padding: 18px;
+  border: 1px solid rgba(56, 189, 248, 0.18);
+  border-radius: 12px;
+  background: rgba(56, 189, 248, 0.03);
+  margin-top: 8px;
+}
+
+.album-companion-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.album-companion-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.album-companion-subtitle {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.album-companion-empty {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.album-companion-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.album-companion-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.album-companion-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.album-companion-section-label {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* Production Progress + Creative Activity stat grid */
+.album-companion-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+}
+
+.album-companion-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 64px;
+}
+
+.album-companion-stat-value {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--color-text-primary);
+}
+
+.album-companion-stat-label {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+}
+
+.album-companion-note {
+  margin: 0;
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  font-style: italic;
+}
+
+/* Creative Memory sub-blocks */
+.album-companion-memory-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.album-companion-memory-label {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+/* Shared list for memory / observations / suggestions */
+.album-companion-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.album-companion-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.album-companion-item::before {
+  content: "•";
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.album-companion-item--approved::before  { color: #4ADE80; }
+.album-companion-item--rejected::before  { color: #F87171; }
+.album-companion-item--notes::before     { color: #A855F7; }
+.album-companion-item--observation::before { color: #38BDF8; }
+.album-companion-item--suggestion::before  { color: #FB923C; }

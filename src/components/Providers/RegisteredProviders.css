@@ -1,0 +1,107 @@
+/* .badge and .secondary are reused as-is (Workspace.css) — see
+   RegisteredProvidersView.tsx's static imports. Only this panel's own
+   layout and availability/result colour variants live here. */
+
+.registered-providers {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  padding: 14px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.015);
+}
+
+.registered-providers-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.registered-providers-subtitle {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.registered-provider-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+}
+
+.registered-provider-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.registered-provider-name {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.registered-provider-empty {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.registered-provider-not-configured {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--color-text-secondary);
+}
+
+.registered-provider-available {
+  background: rgba(34, 197, 94, 0.12);
+  color: #4ADE80;
+}
+
+.registered-provider-unavailable {
+  background: rgba(239, 68, 68, 0.12);
+  color: #F87171;
+}
+
+.registered-provider-execution-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.registered-provider-execution-label {
+  font-weight: 600;
+  margin-right: auto;
+}
+
+.registered-provider-execute-btn {
+  flex-shrink: 0;
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.registered-provider-result {
+  flex-basis: 100%;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.registered-provider-result-failed {
+  color: #F87171;
+}
+
+.registered-provider-result-completed {
+  color: #4ADE80;
+}

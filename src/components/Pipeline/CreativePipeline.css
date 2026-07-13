@@ -1,0 +1,91 @@
+/* .badge (base pill) and .secondary (button variant) are reused as-is —
+   see CreativePipelineView.tsx's static imports and Workspace.css. Only
+   the Pipeline's own layout and status-colour variants live here. */
+
+.creative-pipeline {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.015);
+}
+
+.pipeline-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pipeline-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.pipeline-current-stage {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.pipeline-stage-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.pipeline-stage-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.pipeline-stage-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.pipeline-stage-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.pipeline-status-not-started {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--color-text-secondary);
+}
+
+.pipeline-status-in-progress {
+  background: rgba(234, 179, 8, 0.1);
+  color: #EAB308;
+}
+
+.pipeline-status-complete {
+  background: rgba(34, 197, 94, 0.12);
+  color: #4ADE80;
+}
+
+.pipeline-stage-summary {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.pipeline-stage-action-btn {
+  align-self: flex-start;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+}

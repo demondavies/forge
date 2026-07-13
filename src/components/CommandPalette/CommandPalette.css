@@ -1,0 +1,86 @@
+/* Both selectors below use the compound ".modal-panel.command-palette-panel"
+   form (not just ".command-palette-panel") so these overrides reliably beat
+   the shared ".modal-panel" rule's own specificity, regardless of CSS load
+   order — a plain single-class selector here would tie with it. */
+.modal-panel.command-palette-panel {
+  width: 560px;
+  max-height: 70vh;
+  overflow: hidden;
+}
+
+/* The search input intentionally reuses the same
+   ".modal-panel input[type=text]" styling every other modal's text field
+   already gets from Modal.css — no look-and-feel is redefined here. */
+
+.command-palette-results {
+  overflow-y: auto;
+
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.command-palette-hint {
+  margin: 12px 4px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.command-palette-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.command-palette-group-label {
+  margin: 0 4px 2px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+.command-result {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+
+  padding: 8px 10px;
+  border-radius: 8px;
+
+  text-align: left;
+  color: var(--color-text-primary);
+
+  transition: background-color 0.1s ease;
+}
+
+.command-result:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.command-result.selected {
+  background: rgba(255, 138, 26, 0.12);
+}
+
+.command-result-icon {
+  flex-shrink: 0;
+  font-size: 16px;
+}
+
+.command-result-name {
+  flex: 1;
+  font-size: 14px;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.command-result-context {
+  flex-shrink: 0;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}

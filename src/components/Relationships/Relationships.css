@@ -1,0 +1,95 @@
+/* The card shell (padding/border/radius/background) comes from the shared
+   .placeholder-card class in Workspace.css, the same trick SummaryCard and
+   ActivityItem already use — only layout specific to a "related item" row
+   is defined here. */
+
+.related-items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.related-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.related-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.related-item-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0; /* lets the label truncate instead of overflowing */
+}
+
+.related-item-icon {
+  flex-shrink: 0;
+  font-size: 16px;
+}
+
+.related-item-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.related-item-label {
+  font-size: 14px;
+  font-weight: 600;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.related-item-reason {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.related-item-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.related-item-btn {
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+
+  font-size: 12px;
+  color: var(--color-text-secondary);
+
+  transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease;
+}
+
+.related-item-btn:hover {
+  border-color: var(--color-accent);
+  color: var(--color-text-primary);
+}
+
+.related-item-btn.confirm {
+  border-color: var(--color-accent);
+  background: rgba(255, 138, 26, 0.12);
+  color: var(--color-text-primary);
+}
+
+.related-item-confirmed {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: #86efac;
+}

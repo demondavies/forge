@@ -1,0 +1,241 @@
+/* Layout wrapper, toolbar, heading, action button, and empty state are all
+   shared across workspace sections — see .section-view etc. in
+   Workspace.css. Only genuinely Project-specific styling lives here. */
+
+.project-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.project-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+
+  padding: 20px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--color-surface);
+
+  text-align: left;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.project-card:hover {
+  border-color: rgba(255, 138, 26, 0.3);
+  transform: translateY(-2px);
+}
+
+.project-card.selected {
+  border-color: var(--color-accent);
+  background: rgba(255, 138, 26, 0.08);
+}
+
+.project-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.project-name {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* Base pill shape comes from the shared .badge class in Workspace.css;
+   this is just a fallback colour before a specific status below overrides it. */
+.status-badge {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--color-text-primary);
+}
+
+/* A muted, calm colour per stage — not required, but makes scanning a
+   list of projects at different stages much faster. */
+.status-idea {
+  background: rgba(139, 139, 139, 0.18);
+  color: var(--color-text-secondary);
+}
+
+.status-planning {
+  background: rgba(59, 130, 246, 0.18);
+  color: #93c5fd;
+}
+
+.status-creating {
+  background: rgba(255, 138, 26, 0.18);
+  color: var(--color-accent);
+}
+
+.status-review {
+  background: rgba(168, 85, 247, 0.18);
+  color: #d8b4fe;
+}
+
+.status-released {
+  background: rgba(34, 197, 94, 0.18);
+  color: #86efac;
+}
+
+.status-archived {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--color-text-secondary);
+}
+
+.project-meta {
+  display: flex;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.project-description {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--color-text-secondary);
+}
+
+/* ---- Project Workspace ----
+   Shown instead of the project list once a project card is clicked. The
+   .card-grid it uses for its summary tiles, and the .placeholder-card /
+   .card-description each SummaryCard builds on, are the same shared
+   classes from Workspace.css — nothing here redefines that box styling. */
+
+.project-workspace {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.back-btn {
+  align-self: flex-start;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  transition: color 0.15s ease;
+}
+
+.back-btn:hover {
+  color: var(--color-text-primary);
+}
+
+.project-workspace-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.project-workspace-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Pushed to the far right of the title row and grouped together — a
+   project has exactly one status badge, but two project-level entry
+   points (Music Workspace, Creative Session) that should read as a
+   distinct pair rather than crowding the title itself. */
+.project-workspace-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.project-workspace-title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.project-workspace-meta {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.project-workspace-description {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+}
+
+.summary-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.summary-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.summary-card-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.summary-card-count {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--color-accent);
+}
+
+.summary-card-open-btn {
+  align-self: flex-start;
+  margin-top: 4px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+
+  font-size: 13px;
+  color: var(--color-text-secondary);
+
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.summary-card-open-btn:hover {
+  border-color: var(--color-accent);
+  color: var(--color-text-primary);
+}
+
+/* ---- Project Tabs ----
+   The Overview/Assets/Knowledge/Releases tab bar inside a Project
+   Workspace. Each tab's own content below it reuses the shared
+   .section-view/.section-toolbar/.section-title/.section-action-btn/
+   .section-empty* classes from Workspace.css — the same ones ProjectsView,
+   KnowledgeView, AssetView, and ReleaseView already use — so nothing here
+   duplicates that layout. */
+
+.project-tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.project-tab {
+  padding: 10px 16px;
+  border-bottom: 2px solid transparent;
+
+  font-size: 14px;
+  color: var(--color-text-secondary);
+
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.project-tab:hover {
+  color: var(--color-text-primary);
+}
+
+.project-tab.active {
+  border-color: var(--color-accent);
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
