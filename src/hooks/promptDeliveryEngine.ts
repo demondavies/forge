@@ -68,16 +68,33 @@ export async function deliverPromptForTrack(
     return;
   }
 
-  onProgress("Waiting for download…");
+  onProgress("Waiting for downloads… (Suno generates 2)");
 
   try {
-    const watch = await watchForDownload(baseline);
-    if (watch.status === "Completed" && watch.filename && watch.path) {
-      onProgress("Download detected.");
-      onProgress("Importing candidate…");
-      onDownload(watch.filename, watch.path);
+    const watch1 = await watchForDownload(baseline);
+    if (watch1.status === "Completed" && watch1.filename && watch1.path) {
+      onProgress("Download 1 detected.");
+      onProgress("Importing candidate 1…");
+      onDownload(watch1.filename, watch1.path);
+
+      // Watch for the second Suno generation — update baseline to include
+      // the first file so it isn't detected again.
+      const baseline2 = [...baseline, watch1.filename];
+      onProgress("Waiting for download 2…");
+      try {
+        const watch2 = await watchForDownload(baseline2, 60);
+        if (watch2.status === "Completed" && watch2.filename && watch2.path) {
+          onProgress("Download 2 detected.");
+          onProgress("Importing candidate 2…");
+          onDownload(watch2.filename, watch2.path);
+        } else {
+          onProgress("Second download not detected — manual import may be required.");
+        }
+      } catch {
+        onProgress("Could not monitor for second download.");
+      }
     } else {
-      onProgress(watch.detail);
+      onProgress(watch1.detail);
       onProgress("Manual import may be required.");
     }
   } catch {
