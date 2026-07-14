@@ -149,6 +149,57 @@
   color: var(--color-accent, #ff8a1a);
 }
 
+/* Album Prompt button in left panel */
+.ps-album-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid var(--color-border, #222);
+  background: transparent;
+  color: var(--color-text-muted, #888);
+  padding: 10px 12px;
+  cursor: pointer;
+  font-size: 0.82rem;
+  text-align: left;
+  transition: background 0.1s, color 0.1s;
+}
+
+.ps-album-btn:hover {
+  background: var(--color-border, #222);
+  color: var(--color-text, #e0e0e0);
+}
+
+.ps-album-btn--active {
+  background: var(--color-accent-dim, rgba(255, 138, 26, 0.12));
+  border-left: 2px solid var(--color-accent, #ff8a1a);
+  color: var(--color-accent, #ff8a1a);
+}
+
+.ps-album-btn-icon {
+  flex-shrink: 0;
+}
+
+.ps-album-btn-label {
+  flex: 1;
+  font-weight: 500;
+}
+
+.ps-album-btn-count {
+  font-size: 0.72rem;
+  background: var(--color-border, #2a2a2a);
+  color: var(--color-text-muted, #888);
+  padding: 1px 6px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.ps-album-btn--active .ps-album-btn-count {
+  background: rgba(255, 138, 26, 0.2);
+  color: var(--color-accent, #ff8a1a);
+}
+
 .ps-add-track-btn {
   border: none;
   border-top: 1px solid var(--color-border, #222);
@@ -165,6 +216,48 @@
 .ps-add-track-btn:hover {
   color: var(--color-text, #e0e0e0);
   background: var(--color-border, #222);
+}
+
+/* ── Album mode center ── */
+.ps-album-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ps-album-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--color-text, #e0e0e0);
+  margin: 0;
+}
+
+.ps-album-subtitle {
+  font-size: 0.85rem;
+  color: var(--color-text-muted, #888);
+  margin: 0;
+}
+
+.ps-generate-all-btn {
+  white-space: nowrap;
+}
+
+.ps-album-tracks-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: var(--color-surface, #151515);
+  border: 1px solid var(--color-border, #222);
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.ps-album-track-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  color: var(--color-text, #e0e0e0);
 }
 
 /* ── CENTRE — track editor ── */
@@ -609,3 +702,143 @@
   padding: 14px;
   flex: 1;
 }
+
+/* ── Album Companion (shown in album mode below the track status) ── */
+
+.album-companion {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  padding: 18px;
+  border: 1px solid rgba(56, 189, 248, 0.18);
+  border-radius: 12px;
+  background: rgba(56, 189, 248, 0.03);
+  margin-top: 8px;
+}
+
+.album-companion-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.album-companion-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.album-companion-subtitle {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.album-companion-empty {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.album-companion-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.album-companion-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.album-companion-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.album-companion-section-label {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.album-companion-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+}
+
+.album-companion-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 64px;
+}
+
+.album-companion-stat-value {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--color-text-primary);
+}
+
+.album-companion-stat-label {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+}
+
+.album-companion-note {
+  margin: 0;
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  font-style: italic;
+}
+
+.album-companion-memory-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.album-companion-memory-label {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.album-companion-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.album-companion-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.album-companion-item::before {
+  content: "•";
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.album-companion-item--approved::before  { color: #4ADE80; }
+.album-companion-item--rejected::before  { color: #F87171; }
+.album-companion-item--notes::before     { color: #A855F7; }
+.album-companion-item--observation::before { color: #38BDF8; }
+.album-companion-item--suggestion::before  { color: #FB923C; }

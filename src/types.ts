@@ -62,7 +62,6 @@ export type WorkspaceSection =
   | "prompt-studio"
   | "release-manifest"
   | "release-translation"
-  | "album-production"
   | "track-workspace"
   | "studio-library"
   | "project-studio"
@@ -578,6 +577,8 @@ export interface Candidate {
   id: string;
   identityId: string;
   executionId: string;
+  // Null only for manually-added file candidates (no generation chain).
+  trackId: string | null;
   title: string;
   status: CandidateStatus;
   createdAt: Date;
@@ -725,4 +726,46 @@ export interface StudioResourceAttachment {
   resourceId: string;
   trackId: string;
   createdAt: Date;
+}
+
+// ── Suno Prompt ────────────────────────────────────────────────────────────────
+// Structured representation of all fields on Suno's Generate page.
+// Serialized as JSON into KnowledgeEntry.insight when saving from Project Studio.
+// Legacy entries (plain freeform text) are parsed by parseSunoPrompt and
+// treated as the styles field so old data keeps working.
+
+export type SunoLyricsMode = "Write" | "Prompt" | "Instrumental";
+
+export interface SunoPrompt {
+  lyricsMode: SunoLyricsMode;
+  lyrics: string;         // "This song will be instrumental…" when Instrumental
+  styles: string;         // comma-separated style tags, matching Suno's own field
+  excludeStyles: string;
+  weirdness: number;      // 0-100
+  styleInfluence: number; // 0-100
+}
+
+export const DEFAULT_SUNO_PROMPT: SunoPrompt = {
+  lyricsMode: "Instrumental",
+  lyrics: "This song will be instrumental, with no vocals or lyrics.",
+  styles: "",
+  excludeStyles: "",
+  weirdness: 30,
+  styleInfluence: 80,
+};
+
+export function parseSunoPrompt(insight: string): SunoPrompt {
+  try {
+    const parsed = JSON.parse(insight) as Record<string, unknown>;
+    if (parsed && typeof parsed === "object" && ("styles" in parsed || "lyricsMode" in parsed)) {
+      return { ...DEFAULT_SUNO_PROMPT, ...(parsed as Partial<SunoPrompt>) };
+    }
+  } catch {
+    // not JSON — fall through to legacy handling
+  }
+  return { ...DEFAULT_SUNO_PROMPT, styles: insight };
+}
+
+export function serializeSunoPrompt(prompt: SunoPrompt): string {
+  return JSON.stringify(prompt);
 }

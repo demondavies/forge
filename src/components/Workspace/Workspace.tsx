@@ -40,7 +40,8 @@ import StudioQueueView from "../StudioQueue/StudioQueueView";
 import ExecutionProviderStatusView from "../ExecutionProviders/ExecutionProviderStatusView";
 import RegisteredProvidersView from "../Providers/RegisteredProvidersView";
 import type { QueueExecutionInput, QueueExecutionResult } from "../../hooks/useStudioQueue";
-import AlbumProductionView from "../Album/AlbumProductionView";
+import { buildAlbumProduction } from "../../hooks/albumProduction";
+import { analyzeAlbum } from "../../hooks/albumCompanion";
 import type { PlanTrackInput, PlanTrackResult } from "../../hooks/usePlannedTracks";
 import ProjectStudioView from "../ProjectStudio/ProjectStudioView";
 import type { SaveAndGenerateResult } from "../ProjectStudio/ProjectStudioView";
@@ -64,7 +65,6 @@ import BrowserAutomationStatusView from "../BrowserAutomation/BrowserAutomationS
 import BrowserSessionResolverView from "../BrowserSessionResolver/BrowserSessionResolverView";
 import StudioLibraryView from "../StudioLibrary/StudioLibraryView";
 import GenerateTrackPanel, { type GenerateResult } from "../GenerationRequest/GenerateTrackPanel";
-import GenerateAlbumPanel from "../GenerationRequest/GenerateAlbumPanel";
 import TrackWorkspaceSplitView from "../WorkspaceSurface/TrackWorkspaceSplitView";
 import WorkspaceSurfaceLauncher from "../WorkspaceSurface/WorkspaceSurfaceLauncher";
 import ProductionConsoleView from "../ProductionConsole/ProductionConsoleView";
@@ -192,14 +192,13 @@ interface WorkspaceProps {
   onRemoveTrack: (id: string) => void;
   onFinishTrack: (id: string) => void;
   onReopenTrack: (id: string) => void;
-  // Opens Album Production for one project (owned by App.tsx) — see the
-  // "Open Album Production" button rendered alongside Music Workspace
-  // below. Same shape as onOpenPromptStudio/onOpenMusicWorkspace.
-  onOpenAlbumProduction: (id: string) => void;
+  // Opens Project Studio for one project (owned by App.tsx) — used as
+  // the Back destination from Track Workspace once Album Production is gone.
+  onOpenProjectStudio: (id: string) => void;
   // Project Studio's generate-in-one-action callback — saves the prompt,
   // attributes it, queues execution, and starts CDP delivery, all from a
   // single button press.
-  onSaveAndGenerateTrack: (track: PlannedTrack, promptText: string) => SaveAndGenerateResult;
+  onSaveAndGenerateTrack: (track: PlannedTrack, prompt: import("../../types").SunoPrompt) => SaveAndGenerateResult;
   // Which planned track Track Workspace is currently open for (owned by
   // App.tsx) — null the rest of the time, including every ordinary visit
   // to any other section. A project can have many planned tracks, so this
@@ -239,6 +238,7 @@ interface WorkspaceProps {
   // the same onAddCandidate already wired above. This component never
   // talks to executionProviders.ts or useCandidates.ts directly.
   onImportCandidates: (execution: CreativeExecution) => Promise<ImportCandidatesResult>;
+  onAddCandidateFromFile: (track: PlannedTrack) => void;
   // Generation Request Engine's own composition (App.tsx's
   // handleGenerateTrack/handleGenerateAlbum) — resolves which prompt
   // version to queue and which provider would fulfil the request, then
@@ -246,7 +246,6 @@ interface WorkspaceProps {
   // Neither of these components talks to useStudioQueue.ts or
   // executionProviders.ts directly.
   onGenerateTrack: (track: PlannedTrack) => GenerateResult;
-  onGenerateAlbum: (projectId: string) => GenerateResult;
   // Workspace Surface's own session state (owned by App.tsx's
   // useWorkspaceSurface) — passed straight through to Track Workspace's
   // split view and launcher. Neither of those components ever imports
@@ -334,7 +333,7 @@ function Workspace({
   onRemoveTrack,
   onFinishTrack,
   onReopenTrack,
-  onOpenAlbumProduction,
+  onOpenProjectStudio,
   onSaveAndGenerateTrack,
   selectedTrackId,
   onOpenTrackWorkspace,
@@ -349,8 +348,8 @@ function Workspace({
   onSetCurrentBest,
   onSetAlbumVersion,
   onImportCandidates,
+  onAddCandidateFromFile,
   onGenerateTrack,
-  onGenerateAlbum,
   workspaceSurfaceOpenId,
   workspaceSurfaceLastOpenedId,
   onOpenWorkspaceSurface,
@@ -385,6 +384,21 @@ function Workspace({
         (() => {
           const studioProject = projects.find((p) => p.id === selectedProjectId);
           if (studioProject) {
+            const studioDiscoveryContext = {
+              identities,
+              projects,
+              knowledgeEntries,
+              assets,
+              releases,
+              captures,
+              relationships,
+            };
+            const studioAlbum = buildAlbumProduction(
+              studioProject, plannedTracks, executions, identity, studioDiscoveryContext, activities,
+            );
+            const albumAnalysis = analyzeAlbum(
+              studioAlbum, executions, candidates, knowledgeEntries, attributions,
+            );
             return (
               <ProjectStudioView
                 project={studioProject}
@@ -408,6 +422,9 @@ function Workspace({
                 onSetAlbumVersion={onSetAlbumVersion}
                 onAddNote={onAddNote}
                 onSaveAndGenerateTrack={onSaveAndGenerateTrack}
+                onImportCandidates={onImportCandidates}
+                onAddCandidateFromFile={onAddCandidateFromFile}
+                albumAnalysis={albumAnalysis}
                 consoleMessages={consoleMessages}
                 onClearConsole={onClearConsole}
                 onLog={onLog}
@@ -505,21 +522,6 @@ function Workspace({
                 <span className="creative-action-icon">🎛️</span>
                 Open Prompt Studio
               </button>
-              {/* Album Production's one entry point — only shown for
-                  multi-track projects (Album/EP), since a Single already
-                  is one track and Music Workspace's own single-track view
-                  already covers it. Rendered here for the same reason
-                  every other off-limits-host sprint's entry point is:
-                  Music Workspace itself is off-limits to modify. */}
-              {musicProject.type !== "Single" && (
-                <button
-                  className="creative-action-btn album-production-entry-btn"
-                  onClick={() => onOpenAlbumProduction(musicProject.id)}
-                >
-                  <span className="creative-action-icon">💿</span>
-                  Open Album Production
-                </button>
-              )}
               {/* Studio Queue — rendered here for the same reason Creative
                   Pipeline and Prompt Studio's entry point both are: Music
                   Workspace is off-limits to modify this sprint. One inline
@@ -615,76 +617,6 @@ function Workspace({
           );
         })()}
 
-      {/* Same guard shape as "prompt-studio" above — openAlbumProduction
-          (App.tsx) always selects the project first. */}
-      {section === "album-production" &&
-        (() => {
-          const albumProject = projects.find((candidate) => candidate.id === selectedProjectId);
-          if (!albumProject) return null;
-
-          const albumTracks = plannedTracks.filter((candidate) => candidate.projectId === albumProject.id);
-
-          return (
-            <>
-              <AlbumProductionView
-                project={albumProject}
-                identity={identity}
-                knowledgeEntries={knowledgeEntries}
-                assets={assets}
-                releases={releases}
-                captures={captures}
-                relationships={relationships}
-                activities={activities}
-                executions={executions}
-                plannedTracks={plannedTracks}
-                candidates={candidates}
-                attributions={attributions}
-                onPlanTrack={onPlanTrack}
-                onRemoveTrack={onRemoveTrack}
-                onQueueExecution={onQueueExecution}
-                onOpenPromptStudio={onOpenPromptStudio}
-                onCaptureKnowledge={onCaptureKnowledge}
-                onOpenAsset={onOpenAsset}
-                onOpenKnowledgeEntry={onOpenKnowledgeEntry}
-                onCreateRelease={onCreateRelease}
-                onOpenReleaseManifest={onOpenReleaseManifest}
-                onBack={() => onOpenMusicWorkspace(albumProject.id)}
-              />
-              {/* Generation Request Engine's Album entry point — rendered
-                  here, as a sibling below AlbumProductionView, for the
-                  same off-limits-host reason as the Track Workspaces
-                  entry list just below it. */}
-              <GenerateAlbumPanel project={albumProject} onGenerateAlbum={onGenerateAlbum} />
-              <ProductionConsoleView messages={consoleMessages} onClear={onClearConsole} />
-              {/* Track Workspace's one entry point — rendered here, as a
-                  sibling below AlbumProductionView, rather than making
-                  each track card inside it clickable directly: Album
-                  Production Engine (its hook and its view) is off-limits
-                  to modify this sprint, the same reason every other
-                  off-limits-host sprint's entry point lives in
-                  Workspace.tsx instead. Deliberately minimal — just a
-                  title and a button per track — so this never becomes a
-                  second place a track's own facts are shown; that's
-                  entirely Album Production's and Track Workspace's own
-                  job. */}
-              {albumTracks.length > 0 && (
-                <div className="track-workspace-entry-list">
-                  <h4 className="track-workspace-entry-list-title">🎵 Track Workspaces</h4>
-                  {albumTracks.map((track) => (
-                    <button
-                      key={track.id}
-                      className="secondary track-workspace-entry-btn"
-                      onClick={() => onOpenTrackWorkspace(track)}
-                    >
-                      {track.title} →
-                    </button>
-                  ))}
-                </div>
-              )}
-            </>
-          );
-        })()}
-
       {/* Same guard shape as "prompt-studio" above, but keyed off
           selectedTrackId (App.tsx) rather than being implied by the
           project alone — a project can have many planned tracks, so
@@ -754,7 +686,7 @@ function Workspace({
                     onAttachResource={onAttachResource}
                     onDetachResource={onDetachResource}
                     onQueueExecution={onQueueExecution}
-                    onBack={() => onOpenAlbumProduction(trackProject.id)}
+                    onBack={() => onOpenProjectStudio(trackProject.id)}
                     canFinish={canFinish}
                     onFinishTrack={() => onFinishTrack(track.id)}
                     onReopenTrack={() => onReopenTrack(track.id)}
@@ -1087,7 +1019,7 @@ function Workspace({
           executions={executions}
           studioResources={studioResources}
           onOpenObject={onOpenObject}
-          onOpenAlbumProduction={onOpenAlbumProduction}
+          onOpenProjectStudio={onOpenProjectStudio}
           onOpenTrackWorkspace={onOpenTrackWorkspace}
         />
       )}

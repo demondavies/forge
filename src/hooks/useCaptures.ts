@@ -1,5 +1,19 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Capture, CaptureType } from "../types";
+
+const CAPTURES_KEY = "forge.captures";
+
+function loadCaptures(): Capture[] {
+  try {
+    const raw = localStorage.getItem(CAPTURES_KEY);
+    if (!raw) return [];
+    return (JSON.parse(raw) as Array<Record<string, unknown>>).map(
+      (c) => ({ ...c, createdAt: new Date(c.createdAt as string) }) as Capture,
+    );
+  } catch {
+    return [];
+  }
+}
 
 // The raw form values needed to create a new capture. "id", "identityId",
 // and "createdAt" aren't included here because the engine itself fills
@@ -28,8 +42,12 @@ export interface CreateCaptureResult {
 // is currently active, newest first (an Inbox is meant to be read like a
 // stream of recent thoughts, not an alphabetized list).
 export function useCaptures(activeIdentityId: string | null) {
-  const [captures, setCaptures] = useState<Capture[]>([]);
+  const [captures, setCaptures] = useState<Capture[]>(loadCaptures);
   const [selectedCaptureId, setSelectedCaptureId] = useState<string | null>(null);
+
+  useEffect(() => {
+    try { localStorage.setItem(CAPTURES_KEY, JSON.stringify(captures)); } catch {}
+  }, [captures]);
 
   const capturesForActiveIdentity = captures
     .filter((capture) => capture.identityId === activeIdentityId)

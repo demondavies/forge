@@ -50,6 +50,8 @@ import { resolveGenerationProvider, resolveTrackPromptVersion } from "./hooks/ge
 import { deliverPromptForTrack } from "./hooks/promptDeliveryEngine";
 import type { ProjectDownloadContext } from "./hooks/promptDeliveryEngine";
 import type { SaveAndGenerateResult } from "./components/ProjectStudio/ProjectStudioView";
+import type { SunoPrompt } from "./types";
+import { serializeSunoPrompt } from "./types";
 import { useProductionConsole } from "./hooks/useProductionConsole";
 import { useWorkspaceSurface } from "./hooks/useWorkspaceSurface";
 import { useCommandPalette } from "./hooks/useCommandPalette";
@@ -129,7 +131,7 @@ function App() {
   // *does* eventually log an Activity, automatically, because it results
   // in a real Asset via handleCreateAsset below, which already logs
   // "Asset Added" for every other caller too.
-  const { candidates, addCandidate, addNote, approveCandidate, rejectCandidate, setCandidatePromotion } = useCandidates(selectedIdentity?.id ?? null);
+  const { candidates, addCandidate, addCandidateFromFile, addNote, approveCandidate, rejectCandidate, setCandidatePromotion } = useCandidates(selectedIdentity?.id ?? null);
 
   const {
     studioResources,
@@ -243,6 +245,18 @@ function App() {
     importResources(filePaths);
   }
 
+  // File-import candidate: opens a multi-select audio file picker and adds
+  // one Candidate per chosen file directly to the given track, bypassing
+  // the generation chain entirely. The synthetic executionId ensures no
+  // existing Set.has() checks accidentally match a real execution.
+  async function handleAddCandidateFromFile(track: PlannedTrack) {
+    const filePaths = await pickAudioFiles();
+    for (const filePath of filePaths) {
+      const fileName = filePath.split(/[\\/]/).pop() ?? filePath;
+      addCandidateFromFile({ trackId: track.id, title: fileName, filePath });
+    }
+  }
+
   // Reveal in Explorer: opens the system file manager at the given path.
   // Fire-and-forget — errors (e.g. file moved) surface as OS-level notices.
   function handleRevealInExplorer(filePath: string) {
@@ -270,13 +284,17 @@ function App() {
   // never deleted; approveCandidate only ever marks it Approved and
   // records which Asset it became.
   function handleApproveCandidate(candidate: Candidate) {
-    const execution = executions.find((candidateExecution) => candidateExecution.id === candidate.executionId);
-    if (!execution) return;
+    const execution = executions.find((e) => e.id === candidate.executionId);
+    let projectId = execution?.projectId;
+    if (!projectId && candidate.trackId) {
+      projectId = plannedTracks.find((t) => t.id === candidate.trackId)?.projectId;
+    }
+    if (!projectId) return;
 
     const result = handleCreateAsset({
       name: candidate.title,
       type: "Audio",
-      projectId: execution.projectId,
+      projectId,
       description: "Promoted from Candidate Review.",
     });
 
@@ -293,7 +311,13 @@ function App() {
     const candidate = candidates.find((c) => c.id === candidateId);
     if (!candidate) return [];
     const execution = executions.find((e) => e.id === candidate.executionId);
-    if (!execution) return [];
+    if (!execution) {
+      // Manual candidate: siblings are others filed directly to the same track.
+      if (!candidate.trackId) return [];
+      return candidates
+        .filter((c) => c.id !== candidateId && c.trackId === candidate.trackId)
+        .map((c) => c.id);
+    }
     const trackIds = new Set(
       attributions
         .filter((a) => a.promptVersionId === execution.promptVersionId)
@@ -407,88 +431,11 @@ function App() {
     return { queued: true, message: `Queued "${promptVersion.title}" for generation — ${providerNote}.` };
   }
 
-  // Same intent, applied to every track in an album at once: queues
-  // whichever of the album's own planned tracks already have an
-  // attributed prompt version, skipping (never guessing for) the rest.
-  // Tracks the {track, executionId} pair so the per-track onDownload
-  // callback in the delivery loop can associate each download with the
-  // right execution — the same composition pattern as handleGenerateTrack,
-  // applied sequentially across the album.
-  function handleGenerateAlbum(projectId: string) {
-    const albumTracks = plannedTracks.filter((track) => track.projectId === projectId);
-
-    let queuedCount = 0;
-    let skippedCount = 0;
-    const deliveryQueue: Array<{ track: PlannedTrack; executionId: string }> = [];
-
-    albumTracks.forEach((track) => {
-      const promptVersion = resolveTrackPromptVersion(track.id, attributions, knowledgeEntries);
-      if (!promptVersion) {
-        skippedCount += 1;
-        return;
-      }
-
-      const execResult = queueExecution({ projectId, promptVersionId: promptVersion.id });
-      if (execResult.execution) {
-        queuedCount += 1;
-        deliveryQueue.push({ track, executionId: execResult.execution.id });
-      } else {
-        skippedCount += 1;
-      }
-    });
-
-    if (queuedCount === 0) {
-      return {
-        queued: false,
-        message: "No tracks have an attributed prompt version yet — write one in Prompt Studio first.",
-      };
-    }
-
-    const resolution = resolveGenerationProvider();
-    const providerNote =
-      resolution.source === "none" ? "no execution provider is available yet" : `Forge will use ${resolution.displayName}`;
-
-    clearConsole();
-    void (async () => {
-      for (const { track, executionId } of deliveryQueue) {
-        const albumProject = projects.find((p) => p.id === track.projectId);
-        const albumProjectContext: ProjectDownloadContext | undefined = albumProject
-          ? { projectType: albumProject.type, projectName: albumProject.name }
-          : undefined;
-        await deliverPromptForTrack(
-          track,
-          attributions,
-          knowledgeEntries,
-          addConsoleMessage,
-          (filename, filePath) => {
-            void filename;
-            const importResult = addCandidate({ executionId, title: track.title, filePath });
-            if (importResult.candidate) {
-              addConsoleMessage("Candidate imported.");
-              addConsoleMessage("Ready for review.");
-            } else {
-              addConsoleMessage("Downloaded file could not be associated with an active generation.");
-              addConsoleMessage("Manual import may be required.");
-            }
-          },
-          albumProjectContext,
-        );
-      }
-    })();
-
-    return {
-      queued: true,
-      message: `Queued ${queuedCount} track(s) for generation${
-        skippedCount > 0 ? `, skipped ${skippedCount} without a prompt` : ""
-      } — ${providerNote}.`,
-    };
-  }
-
   // Project Studio's generate flow: saves the prompt as a new version,
   // attributes it to the track, queues execution, and starts CDP delivery
   // — all in one action, using synchronously-returned values to build
   // fresh arrays for deliverPromptForTrack so it always sees the new entry.
-  function handleSaveAndGenerateTrack(track: PlannedTrack, promptText: string): SaveAndGenerateResult {
+  function handleSaveAndGenerateTrack(track: PlannedTrack, prompt: SunoPrompt): SaveAndGenerateResult {
     const trackAttrList = attributions.filter((a) => a.trackId === track.id);
     const attrVersionIds = new Set(trackAttrList.map((a) => a.promptVersionId));
     const trackVersionCount = knowledgeEntries.filter(
@@ -497,7 +444,7 @@ function App() {
 
     const saveResult = handleCaptureKnowledge({
       title: `${track.title} - Prompt v${trackVersionCount + 1}`,
-      insight: promptText,
+      insight: serializeSunoPrompt(prompt),
       source: "Experiment",
       projectId: track.projectId,
     });
@@ -658,13 +605,6 @@ function App() {
   // openMusicWorkspace, just landing on "prompt-studio" instead.
   function openPromptStudio(id: string) {
     setActiveSection("prompt-studio");
-    selectProject(id);
-  }
-
-  // Opens Album Production for one project — identical shape to
-  // openPromptStudio, just landing on "album-production" instead.
-  function openAlbumProduction(id: string) {
-    setActiveSection("album-production");
     selectProject(id);
   }
 
@@ -887,7 +827,7 @@ function App() {
         onRemoveTrack={removeTrack}
         onFinishTrack={finishTrack}
         onReopenTrack={reopenTrack}
-        onOpenAlbumProduction={openAlbumProduction}
+        onOpenProjectStudio={openProjectStudio}
         onSaveAndGenerateTrack={handleSaveAndGenerateTrack}
         selectedTrackId={selectedTrackId}
         onOpenTrackWorkspace={openTrackWorkspace}
@@ -902,8 +842,8 @@ function App() {
         onSetCurrentBest={handleSetCurrentBest}
         onSetAlbumVersion={handleSetAlbumVersion}
         onImportCandidates={handleImportCandidates}
+        onAddCandidateFromFile={handleAddCandidateFromFile}
         onGenerateTrack={handleGenerateTrack}
-        onGenerateAlbum={handleGenerateAlbum}
         workspaceSurfaceOpenId={workspaceSurfaceOpenId}
         workspaceSurfaceLastOpenedId={workspaceSurfaceLastOpenedId}
         onOpenWorkspaceSurface={openWorkspaceSurface}

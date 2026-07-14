@@ -1,4 +1,5 @@
 import type { KnowledgeEntry, PlannedTrack, PromptAttribution } from "../types";
+import { parseSunoPrompt } from "../types";
 import { resolveTrackPromptVersion } from "./generationRequest";
 import { resolveSunoGenerateSession } from "./browserSessionResolver";
 import { automateSunoPage, snapshotSunoSongIds, pollSunoNewSongs } from "../providers/chromeAutomationTarget";
@@ -37,9 +38,11 @@ export async function deliverPromptForTrack(
 
   onProgress(`Resolved: "${promptVersion.title}".`);
 
+  const sunoPrompt = parseSunoPrompt(promptVersion.insight);
+
   try {
-    await navigator.clipboard.writeText(promptVersion.insight);
-    onProgress("Prompt copied to clipboard.");
+    await navigator.clipboard.writeText(sunoPrompt.styles || promptVersion.insight);
+    onProgress("Styles copied to clipboard.");
   } catch {
     onProgress("Clipboard unavailable — prompt will be delivered directly by automation.");
   }
@@ -81,7 +84,7 @@ export async function deliverPromptForTrack(
   await new Promise<void>((resolve) => setTimeout(resolve, 3000));
 
   try {
-    const automation = await automateSunoPage(tabId, promptVersion.insight);
+    const automation = await automateSunoPage(tabId, sunoPrompt, track.title);
     if (automation.status !== "Completed") {
       onProgress(automation.detail);
       onProgress("Automation paused. Take over manually.");

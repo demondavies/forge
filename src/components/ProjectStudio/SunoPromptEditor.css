@@ -1,0 +1,181 @@
+.spe-root {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.spe-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.spe-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted, #888);
+}
+
+.spe-mode-row {
+  display: flex;
+  gap: 6px;
+}
+
+.spe-mode-btn {
+  flex: 1;
+  border: 1px solid var(--color-border, #333);
+  background: transparent;
+  color: var(--color-text-muted, #888);
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: background 0.1s, color 0.1s, border-color 0.1s;
+}
+
+.spe-mode-btn:hover {
+  background: var(--color-border, #222);
+  color: var(--color-text, #e0e0e0);
+}
+
+.spe-mode-btn--active {
+  background: var(--color-accent-dim, rgba(255, 138, 26, 0.15));
+  border-color: var(--color-accent, #ff8a1a);
+  color: var(--color-accent, #ff8a1a);
+  font-weight: 600;
+}
+
+.spe-textarea {
+  width: 100%;
+  background: var(--color-bg, #0f0f0f);
+  border: 1px solid var(--color-border, #222);
+  border-radius: 6px;
+  color: var(--color-text, #e0e0e0);
+  padding: 8px 10px;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.spe-textarea::placeholder {
+  color: var(--color-text-muted, #888);
+  font-style: italic;
+}
+
+.spe-textarea:focus {
+  outline: none;
+  border-color: var(--color-accent, #ff8a1a);
+}
+
+.spe-input {
+  width: 100%;
+  background: var(--color-bg, #0f0f0f);
+  border: 1px solid var(--color-border, #222);
+  border-radius: 6px;
+  color: var(--color-text, #e0e0e0);
+  padding: 7px 10px;
+  font-size: 0.85rem;
+  font-family: inherit;
+}
+
+.spe-input::placeholder {
+  color: var(--color-text-muted, #888);
+}
+
+.spe-input:focus {
+  outline: none;
+  border-color: var(--color-accent, #ff8a1a);
+}
+
+.spe-hint {
+  font-size: 0.72rem;
+  color: var(--color-text-muted, #888);
+  margin: 0;
+}
+
+.spe-sliders {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.spe-slider-row {
+  display: grid;
+  grid-template-columns: 110px 1fr 40px;
+  align-items: center;
+  gap: 10px;
+}
+
+.spe-slider-label {
+  font-size: 0.82rem;
+  color: var(--color-text-muted, #888);
+}
+
+.spe-slider {
+  width: 100%;
+  accent-color: var(--color-accent, #ff8a1a);
+  cursor: pointer;
+}
+
+.spe-slider-value {
+  font-size: 0.82rem;
+  color: var(--color-text, #e0e0e0);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Companion lyric prompt suggestions — only visible in Prompt mode */
+.spe-suggestions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.spe-suggestions-header {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-accent, #ff8a1a);
+  opacity: 0.8;
+}
+
+.spe-suggestion-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+  background: transparent;
+  border: 1px solid var(--color-border, #2a2a2a);
+  border-left: 3px solid var(--color-accent, #ff8a1a);
+  border-radius: 0 6px 6px 0;
+  padding: 8px 10px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.spe-suggestion-card:hover {
+  background: var(--color-accent-dim, rgba(255, 138, 26, 0.08));
+  border-color: var(--color-accent, #ff8a1a);
+}
+
+.spe-suggestion-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-accent, #ff8a1a);
+  opacity: 0.7;
+}
+
+.spe-suggestion-text {
+  font-size: 0.8rem;
+  color: var(--color-text-muted, #888);
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-break: break-word;
+}

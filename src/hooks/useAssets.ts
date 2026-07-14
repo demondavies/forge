@@ -1,5 +1,19 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Asset, AssetType } from "../types";
+
+const ASSETS_KEY = "forge.assets";
+
+function loadAssets(): Asset[] {
+  try {
+    const raw = localStorage.getItem(ASSETS_KEY);
+    if (!raw) return [];
+    return (JSON.parse(raw) as Array<Record<string, unknown>>).map(
+      (a) => ({ ...a, createdAt: new Date(a.createdAt as string) }) as Asset,
+    );
+  } catch {
+    return [];
+  }
+}
 
 // The raw form values needed to create a new asset. "id", "identityId", and
 // "createdAt" aren't included here because the engine itself fills those in
@@ -31,8 +45,12 @@ export interface CreateAssetResult {
 // project it belongs to. This hook filters that array down to whichever
 // identity is currently active.
 export function useAssets(activeIdentityId: string | null) {
-  const [assets, setAssets] = useState<Asset[]>([]);
+  const [assets, setAssets] = useState<Asset[]>(loadAssets);
   const [selectedAssetId, setSelectedAssetId] = useState<string | null>(null);
+
+  useEffect(() => {
+    try { localStorage.setItem(ASSETS_KEY, JSON.stringify(assets)); } catch {}
+  }, [assets]);
 
   // Only the assets that belong to the currently selected identity.
   const assetsForActiveIdentity = assets.filter(

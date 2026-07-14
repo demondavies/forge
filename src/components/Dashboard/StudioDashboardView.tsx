@@ -38,7 +38,7 @@ interface StudioDashboardViewProps {
   executions: CreativeExecution[];
   studioResources: StudioResource[];
   onOpenObject: (ref: ObjectRef) => void;
-  onOpenAlbumProduction: (projectId: string) => void;
+  onOpenProjectStudio: (projectId: string) => void;
   onOpenTrackWorkspace: (track: PlannedTrack) => void;
 }
 
@@ -73,7 +73,7 @@ function StudioDashboardView({
   executions,
   studioResources,
   onOpenObject,
-  onOpenAlbumProduction,
+  onOpenProjectStudio,
   onOpenTrackWorkspace,
 }: StudioDashboardViewProps) {
   const discoveryContext: DiscoveryContext = {
@@ -163,7 +163,7 @@ function StudioDashboardView({
           </div>
           <button
             className="dashboard-card-action"
-            onClick={() => onOpenAlbumProduction(currentAlbum.id)}
+            onClick={() => onOpenProjectStudio(currentAlbum.id)}
           >
             Continue →
           </button>

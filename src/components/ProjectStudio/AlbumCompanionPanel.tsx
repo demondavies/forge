@@ -1,5 +1,5 @@
 import type { AlbumCompanionAnalysis } from "../../hooks/albumCompanion";
-import "./AlbumProduction.css";
+import "./ProjectStudio.css";
 
 interface AlbumCompanionPanelProps {
   analysis: AlbumCompanionAnalysis;
@@ -49,7 +49,7 @@ function AlbumCompanionPanel({ analysis }: AlbumCompanionPanelProps) {
             </div>
             {progress.tracksGenerated === 0 && (
               <p className="album-companion-note">
-                Track-level counts require a prompt to be attributed to each track via Prompt Studio's Target Track picker.
+                Track-level counts require a prompt to be attributed to each track via the Target Track picker.
               </p>
             )}
           </div>

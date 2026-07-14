@@ -1,5 +1,23 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Release, ReleasePlatform, ReleaseStatus } from "../types";
+
+const RELEASES_KEY = "forge.releases";
+
+function loadReleases(): Release[] {
+  try {
+    const raw = localStorage.getItem(RELEASES_KEY);
+    if (!raw) return [];
+    return (JSON.parse(raw) as Array<Record<string, unknown>>).map(
+      (r) => ({
+        ...r,
+        createdAt: new Date(r.createdAt as string),
+        releaseDate: new Date(r.releaseDate as string),
+      }) as Release,
+    );
+  } catch {
+    return [];
+  }
+}
 
 // The raw form values needed to create a new release. "id", "identityId",
 // and "createdAt" aren't included here because the engine itself fills
@@ -41,8 +59,12 @@ function parseDateInputValue(value: string): Date {
 // or project it belongs to. This hook filters that array down to whichever
 // identity is currently active, and sorts by release date (newest first).
 export function useReleases(activeIdentityId: string | null) {
-  const [releases, setReleases] = useState<Release[]>([]);
+  const [releases, setReleases] = useState<Release[]>(loadReleases);
   const [selectedReleaseId, setSelectedReleaseId] = useState<string | null>(null);
+
+  useEffect(() => {
+    try { localStorage.setItem(RELEASES_KEY, JSON.stringify(releases)); } catch {}
+  }, [releases]);
 
   const releasesForActiveIdentity = releases
     .filter((release) => release.identityId === activeIdentityId)

@@ -15,6 +15,7 @@ function loadCandidates(): Candidate[] {
       ),
       isCurrentBest: (c.isCurrentBest as boolean) ?? false,
       isAlbumVersion: (c.isAlbumVersion as boolean) ?? false,
+      trackId: (c.trackId as string | null) ?? null,
     }) as Candidate);
   } catch {
     return [];
@@ -30,6 +31,14 @@ export interface AddCandidateInput {
   executionId: string;
   title: string;
   filePath?: string | null;
+}
+
+// Input for manually adding a downloaded audio file directly to a track,
+// bypassing the generation chain entirely.
+export interface AddCandidateFromFileInput {
+  trackId: string;
+  title: string;
+  filePath: string;
 }
 
 // addCandidate() can fail validation, so instead of throwing it returns
@@ -88,6 +97,7 @@ export function useCandidates(activeIdentityId: string | null) {
       id: crypto.randomUUID(),
       identityId: activeIdentityId,
       executionId: input.executionId,
+      trackId: null,
       title: trimmedTitle,
       status: "Pending Review",
       createdAt: new Date(),
@@ -129,6 +139,32 @@ export function useCandidates(activeIdentityId: string | null) {
     );
   }
 
+  function addCandidateFromFile(input: AddCandidateFromFileInput): AddCandidateResult {
+    if (!activeIdentityId) {
+      return { error: "Select an identity first.", candidate: null };
+    }
+    const trimmedTitle = input.title.trim();
+    if (!trimmedTitle) {
+      return { error: "Give this candidate a title.", candidate: null };
+    }
+    const newCandidate: Candidate = {
+      id: crypto.randomUUID(),
+      identityId: activeIdentityId,
+      executionId: crypto.randomUUID(),
+      trackId: input.trackId,
+      title: trimmedTitle,
+      status: "Pending Review",
+      createdAt: new Date(),
+      approvedAssetId: null,
+      filePath: input.filePath,
+      notes: [],
+      isCurrentBest: false,
+      isAlbumVersion: false,
+    };
+    setCandidates((current) => [...current, newCandidate]);
+    return { error: null, candidate: newCandidate };
+  }
+
   function rejectCandidate(id: string) {
     setCandidates((current) =>
       current.map((candidate) => (candidate.id === id ? { ...candidate, status: "Rejected" } : candidate)),
@@ -160,6 +196,7 @@ export function useCandidates(activeIdentityId: string | null) {
     // with every other useX hook's own allX export.
     allCandidates: candidates,
     addCandidate,
+    addCandidateFromFile,
     addNote,
     approveCandidate,
     rejectCandidate,

@@ -1,6 +1,20 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { KnowledgeEntry, KnowledgeSource } from "../types";
 import { CODEX_KNOWLEDGE_ENTRIES } from "../data/codexSeed";
+
+const KNOWLEDGE_KEY = "forge.knowledge";
+
+function loadEntries(): KnowledgeEntry[] {
+  try {
+    const raw = localStorage.getItem(KNOWLEDGE_KEY);
+    if (!raw) return CODEX_KNOWLEDGE_ENTRIES;
+    return (JSON.parse(raw) as Array<Record<string, unknown>>).map(
+      (e) => ({ ...e, createdAt: new Date(e.createdAt as string) }) as KnowledgeEntry,
+    );
+  } catch {
+    return CODEX_KNOWLEDGE_ENTRIES;
+  }
+}
 
 // The raw form values needed to capture a new knowledge entry. "id",
 // "identityId", and "createdAt" aren't included here because the engine
@@ -35,8 +49,12 @@ export function useKnowledge(activeIdentityId: string | null) {
   // identity, see codexSeed.ts) — every other identity's array starts empty
   // exactly as before; this is just non-empty initial data for one of them,
   // not a special case in this hook's own logic.
-  const [entries, setEntries] = useState<KnowledgeEntry[]>(CODEX_KNOWLEDGE_ENTRIES);
+  const [entries, setEntries] = useState<KnowledgeEntry[]>(loadEntries);
   const [selectedEntryId, setSelectedEntryId] = useState<string | null>(null);
+
+  useEffect(() => {
+    try { localStorage.setItem(KNOWLEDGE_KEY, JSON.stringify(entries)); } catch {}
+  }, [entries]);
 
   // Only the knowledge that belongs to the currently selected identity,
   // newest first.

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import type {
   Candidate,
   CreativeExecution,
@@ -7,14 +7,22 @@ import type {
   PlannedTrack,
   Project,
   PromptAttribution,
+  SunoPrompt,
 } from "../../types";
+import { DEFAULT_SUNO_PROMPT, parseSunoPrompt, serializeSunoPrompt } from "../../types";
+import SunoPromptEditor from "./SunoPromptEditor";
 import type { PlanTrackInput, PlanTrackResult } from "../../hooks/usePlannedTracks";
 import type { CaptureKnowledgeInput, CaptureKnowledgeResult } from "../../hooks/useKnowledge";
 import type { AttributePromptInput, AttributePromptResult } from "../../hooks/usePromptAttributions";
 import { isPromptVersion } from "../../hooks/promptComposition";
 import { analyzeTrack } from "../../hooks/producerCompanion";
+import { buildLyricPromptSuggestions } from "../../hooks/lyricPromptSuggestions";
 import { useCandidatePlayback } from "../../hooks/useCandidatePlayback";
+import type { AlbumCompanionAnalysis } from "../../hooks/albumCompanion";
+import AlbumCompanionPanel from "./AlbumCompanionPanel";
 import ProducerCompanionPanel from "../TrackWorkspace/ProducerCompanionPanel";
+import CandidateImportPanel from "../CandidateImport/CandidateImportPanel";
+import type { ImportCandidatesResult } from "../CandidateImport/CandidateImportPanel";
 import "./ProjectStudio.css";
 
 export type SaveAndGenerateResult = { queued: boolean; message: string };
@@ -40,7 +48,10 @@ interface ProjectStudioViewProps {
   onSetCurrentBest: (candidateId: string) => void;
   onSetAlbumVersion: (candidateId: string) => void;
   onAddNote: (candidateId: string, text: string) => void;
-  onSaveAndGenerateTrack: (track: PlannedTrack, promptText: string) => SaveAndGenerateResult;
+  onSaveAndGenerateTrack: (track: PlannedTrack, prompt: SunoPrompt) => SaveAndGenerateResult;
+  onImportCandidates: (execution: CreativeExecution) => Promise<ImportCandidatesResult>;
+  onAddCandidateFromFile: (track: PlannedTrack) => void;
+  albumAnalysis?: AlbumCompanionAnalysis;
   consoleMessages: string[];
   onClearConsole: () => void;
   onLog: (message: string) => void;
@@ -81,7 +92,9 @@ function TrackStatusBadge({
     (e) => e.projectId === projectId && attributedVersionIds.has(e.promptVersionId),
   );
   const trackExecIds = new Set(trackExecs.map((e) => e.id));
-  const trackCandidates = candidates.filter((c) => trackExecIds.has(c.executionId));
+  const trackCandidates = candidates.filter(
+    (c) => trackExecIds.has(c.executionId) || c.trackId === track.id,
+  );
 
   if (trackCandidates.some((c) => c.status === "Approved")) {
     return <span className="ps-track-badge ps-track-badge--approved">Approved</span>;
@@ -120,6 +133,9 @@ function ProjectStudioView({
   onSetAlbumVersion,
   onAddNote,
   onSaveAndGenerateTrack,
+  onImportCandidates,
+  onAddCandidateFromFile,
+  albumAnalysis,
   consoleMessages,
   onClearConsole,
   onLog,
@@ -130,12 +146,16 @@ function ProjectStudioView({
     .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
 
   const [activeTrackId, setActiveTrackId] = useState<string | null>(null);
+  const [albumMode, setAlbumMode] = useState(false);
   const [editingTitle, setEditingTitle] = useState(false);
   const [titleDraft, setTitleDraft] = useState("");
   const [descDraft, setDescDraft] = useState("");
-  const [promptText, setPromptText] = useState("");
+  const [sunoPrompt, setSunoPrompt] = useState<SunoPrompt>(DEFAULT_SUNO_PROMPT);
   const [generateMessage, setGenerateMessage] = useState<string | null>(null);
   const [promptTitle, setPromptTitle] = useState("");
+  const [albumSunoPrompt, setAlbumSunoPrompt] = useState<SunoPrompt>(DEFAULT_SUNO_PROMPT);
+  const [albumPromptTitle, setAlbumPromptTitle] = useState("");
+  const [albumGenerateMessage, setAlbumGenerateMessage] = useState<string | null>(null);
   const [showConsole, setShowConsole] = useState(false);
   const [companionOpen, setCompanionOpen] = useState(true);
   const [draftNotes, setDraftNotes] = useState<Record<string, string>>({});
@@ -161,12 +181,27 @@ function ProjectStudioView({
 
   const activeTrack = projectTracks.find((t) => t.id === activeTrackId) ?? null;
 
+  const lyricSuggestions = useMemo(
+    () =>
+      activeTrack
+        ? buildLyricPromptSuggestions(
+            activeTrack,
+            project,
+            projectTracks,
+            knowledgeEntries,
+            sunoPrompt.styles,
+          )
+        : [],
+    [activeTrack, project, projectTracks, knowledgeEntries, sunoPrompt.styles],
+  );
+
   // Sync edit drafts when switching tracks.
   useEffect(() => {
     if (activeTrack) {
       setTitleDraft(activeTrack.title);
       setDescDraft(activeTrack.description ?? "");
       setEditingTitle(false);
+      setSunoPrompt(DEFAULT_SUNO_PROMPT);
       setPromptTitle("");
     }
   }, [activeTrackId]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -206,7 +241,7 @@ function ProjectStudioView({
     : [];
   const trackExecIds = new Set(trackExecs.map((e) => e.id));
   const trackCandidates = candidates
-    .filter((c) => trackExecIds.has(c.executionId))
+    .filter((c) => trackExecIds.has(c.executionId) || c.trackId === activeTrack?.id)
     .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
 
   const { activeCandidateId, isPlaying, currentTime, duration, play, pause, stop } =
@@ -219,9 +254,49 @@ function ProjectStudioView({
 
   function handleSelectTrack(id: string) {
     setActiveTrackId(id);
+    setAlbumMode(false);
     setGenerateMessage(null);
     setShowConsole(false);
     onClearConsole();
+  }
+
+  function handleAlbumMode() {
+    setAlbumMode(true);
+    setActiveTrackId(null);
+    setAlbumGenerateMessage(null);
+    setShowConsole(false);
+    onClearConsole();
+  }
+
+  function handleSaveAlbumPrompt() {
+    const autoTitle = `${project.name} - Album Prompt`;
+    const title = albumPromptTitle.trim() || autoTitle;
+    const saveResult = onSaveKnowledge({
+      title,
+      insight: serializeSunoPrompt(albumSunoPrompt),
+      source: "Experiment",
+      projectId: project.id,
+    });
+    if (saveResult.entry) {
+      setAlbumGenerateMessage(`Saved as "${title}".`);
+      setAlbumPromptTitle("");
+    } else {
+      setAlbumGenerateMessage(saveResult.error ?? "Could not save.");
+    }
+  }
+
+  function handleGenerateAll() {
+    const pendingTracks = projectTracks.filter((t) => !t.completedAt);
+    if (pendingTracks.length === 0) return;
+    let queued = 0;
+    for (const track of pendingTracks) {
+      const result = onSaveAndGenerateTrack(track, albumSunoPrompt);
+      if (result.queued) queued++;
+    }
+    setAlbumGenerateMessage(
+      `Queued ${queued} of ${pendingTracks.length} track${pendingTracks.length !== 1 ? "s" : ""}.`,
+    );
+    setShowConsole(true);
   }
 
   function handleTitleSave() {
@@ -237,27 +312,27 @@ function ProjectStudioView({
 
   function handleLoadVersion(versionId: string) {
     const version = knowledgeEntries.find((e) => e.id === versionId);
-    if (version) setPromptText(version.insight);
+    if (version) setSunoPrompt(parseSunoPrompt(version.insight));
   }
 
   function handleGenerate() {
     if (!activeTrack) return;
-    if (!promptText.trim()) {
-      setGenerateMessage("Enter a prompt first.");
+    if (!sunoPrompt.styles.trim() && sunoPrompt.lyricsMode === "Instrumental") {
+      setGenerateMessage("Add at least one style tag first.");
       return;
     }
-    const result = onSaveAndGenerateTrack(activeTrack, promptText.trim());
+    const result = onSaveAndGenerateTrack(activeTrack, sunoPrompt);
     setGenerateMessage(result.message);
     setShowConsole(true);
   }
 
   function handleSavePromptOnly() {
-    if (!activeTrack || !promptText.trim()) return;
+    if (!activeTrack) return;
     const autoTitle = `${activeTrack.title} - Prompt v${trackPromptVersions.length + 1}`;
     const title = promptTitle.trim() || autoTitle;
     const saveResult = onSaveKnowledge({
       title,
-      insight: promptText.trim(),
+      insight: serializeSunoPrompt(sunoPrompt),
       source: "Experiment",
       projectId: project.id,
     });
@@ -281,7 +356,7 @@ function ProjectStudioView({
     const vids = new Set(ta.map((a) => a.promptVersionId));
     const execs = executions.filter((e) => e.projectId === project.id && vids.has(e.promptVersionId));
     const eids = new Set(execs.map((e) => e.id));
-    const cands = candidates.filter((c) => eids.has(c.executionId));
+    const cands = candidates.filter((c) => eids.has(c.executionId) || c.trackId === track.id);
     return cands.some((c) => c.isAlbumVersion) && cands.some((c) => c.status === "Approved");
   }
 
@@ -291,7 +366,7 @@ function ProjectStudioView({
     <div className="ps-root">
       <div className="ps-topbar">
         <button className="back-btn ps-back" onClick={onBack}>
-          ← {project.name}
+          ← Back to Projects
         </button>
         <h2 className="ps-project-title">{project.name}</h2>
         <span className="ps-project-type">{project.type}</span>
@@ -300,11 +375,19 @@ function ProjectStudioView({
       <div className="ps-layout">
         {/* LEFT — track list */}
         <aside className="ps-left">
+          <button
+            className={`ps-album-btn${albumMode ? " ps-album-btn--active" : ""}`}
+            onClick={handleAlbumMode}
+          >
+            <span className="ps-album-btn-icon">⚡</span>
+            <span className="ps-album-btn-label">Album Prompt</span>
+            <span className="ps-album-btn-count">{projectTracks.filter((t) => !t.completedAt).length}</span>
+          </button>
           <div className="ps-tracklist">
             {projectTracks.map((track, index) => (
               <button
                 key={track.id}
-                className={`ps-track-item${track.id === activeTrackId ? " ps-track-item--active" : ""}${track.completedAt ? " ps-track-item--done" : ""}`}
+                className={`ps-track-item${track.id === activeTrackId && !albumMode ? " ps-track-item--active" : ""}${track.completedAt ? " ps-track-item--done" : ""}`}
                 onClick={() => handleSelectTrack(track.id)}
               >
                 <span className="ps-track-number">{index + 1}</span>
@@ -324,9 +407,116 @@ function ProjectStudioView({
           </button>
         </aside>
 
-        {/* CENTRE — active track editor */}
+        {/* CENTRE — active track editor or album prompt */}
         <main className="ps-center">
-          {!activeTrack ? (
+          {albumMode ? (
+            <>
+              <div className="ps-album-header">
+                <h2 className="ps-album-title">⚡ Album Prompt</h2>
+                <p className="ps-album-subtitle">
+                  Write one prompt and generate all tracks in <strong>{project.name}</strong>.
+                </p>
+              </div>
+
+              {/* Prompt composer */}
+              <div className="ps-prompt-section">
+                <div className="ps-prompt-header">
+                  <h3 className="ps-section-title">Prompt</h3>
+                  {allProjectPrompts.length > 0 && (
+                    <select
+                      className="ps-version-select"
+                      defaultValue=""
+                      onChange={(e) => {
+                        if (e.target.value) {
+                          const entry = knowledgeEntries.find((k) => k.id === e.target.value);
+                          if (entry) setAlbumSunoPrompt(parseSunoPrompt(entry.insight));
+                        }
+                        e.target.value = "";
+                      }}
+                    >
+                      <option value="">Load saved…</option>
+                      {[...allProjectPrompts].reverse().map((v) => (
+                        <option key={v.id} value={v.id}>{v.title}</option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+                <input
+                  className="ps-prompt-title-input"
+                  type="text"
+                  placeholder="Prompt name (optional)…"
+                  value={albumPromptTitle}
+                  onChange={(e) => setAlbumPromptTitle(e.target.value)}
+                />
+                <SunoPromptEditor value={albumSunoPrompt} onChange={setAlbumSunoPrompt} />
+                <div className="ps-prompt-actions">
+                  <button className="secondary" onClick={handleSaveAlbumPrompt}>
+                    💾 Save
+                  </button>
+                  <button
+                    className="ps-generate-btn ps-generate-all-btn"
+                    onClick={handleGenerateAll}
+                    disabled={projectTracks.filter((t) => !t.completedAt).length === 0}
+                  >
+                    ⚡ Generate All ({projectTracks.filter((t) => !t.completedAt).length} tracks)
+                  </button>
+                </div>
+                {albumGenerateMessage && (
+                  <p className="ps-generate-message">{albumGenerateMessage}</p>
+                )}
+              </div>
+
+              {/* Generation log */}
+              {showConsole && consoleMessages.length > 0 && (
+                <div className="ps-console">
+                  <div className="ps-console-header">
+                    <span className="ps-console-label">Generation Log</span>
+                    <button className="secondary ps-console-clear" onClick={() => { onClearConsole(); setShowConsole(false); }}>
+                      Clear
+                    </button>
+                  </div>
+                  <div className="ps-console-messages">
+                    {consoleMessages.map((msg, i) => (
+                      <p key={i} className="ps-console-line">{msg}</p>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Per-track status summary */}
+              <div className="ps-album-tracks-summary">
+                <h3 className="ps-section-title">Track Status</h3>
+                {projectTracks.map((track, index) => (
+                  <div key={track.id} className="ps-album-track-row">
+                    <span className="ps-track-number">{index + 1}</span>
+                    <span className="ps-track-name">{track.title}</span>
+                    <TrackStatusBadge
+                      track={track}
+                      executions={executions}
+                      candidates={candidates}
+                      attributions={attributions}
+                      projectId={project.id}
+                    />
+                  </div>
+                ))}
+              </div>
+
+              {/* Per-track import panels — each self-hides if no executions exist yet */}
+              {projectTracks.map((track) => (
+                <CandidateImportPanel
+                  key={track.id}
+                  track={track}
+                  executions={executions}
+                  plannedTracks={projectTracks}
+                  knowledgeEntries={knowledgeEntries}
+                  getAttributedTrackId={getAttributedTrackId}
+                  onImportCandidates={onImportCandidates}
+                />
+              ))}
+
+              {albumAnalysis && <AlbumCompanionPanel analysis={albumAnalysis} />}
+            </>
+          ) : !activeTrack ? (
             <p className="ps-empty">Select a track to start working.</p>
           ) : (
             <>
@@ -419,26 +609,17 @@ function ProjectStudioView({
                   value={promptTitle}
                   onChange={(e) => setPromptTitle(e.target.value)}
                 />
-                <textarea
-                  className="ps-prompt-textarea"
-                  placeholder="Describe the sound you're going for — genre, mood, instruments, references…"
-                  value={promptText}
-                  rows={5}
-                  onChange={(e) => setPromptText(e.target.value)}
+                <SunoPromptEditor
+                  value={sunoPrompt}
+                  onChange={setSunoPrompt}
+                  suggestions={lyricSuggestions}
+                  onUseSuggestion={(text) => setSunoPrompt({ ...sunoPrompt, lyrics: text })}
                 />
                 <div className="ps-prompt-actions">
-                  <button
-                    className="secondary"
-                    onClick={handleSavePromptOnly}
-                    disabled={!promptText.trim()}
-                  >
+                  <button className="secondary" onClick={handleSavePromptOnly}>
                     💾 Save
                   </button>
-                  <button
-                    className="ps-generate-btn"
-                    onClick={handleGenerate}
-                    disabled={!promptText.trim()}
-                  >
+                  <button className="ps-generate-btn" onClick={handleGenerate}>
                     ⚡ Generate
                   </button>
                 </div>
@@ -446,6 +627,16 @@ function ProjectStudioView({
                   <p className="ps-generate-message">{generateMessage}</p>
                 )}
               </div>
+
+              {/* Candidate import — surfaces once executions exist for this track */}
+              <CandidateImportPanel
+                track={activeTrack}
+                executions={executions}
+                plannedTracks={projectTracks}
+                knowledgeEntries={knowledgeEntries}
+                getAttributedTrackId={getAttributedTrackId}
+                onImportCandidates={onImportCandidates}
+              />
 
               {/* Production console */}
               {showConsole && consoleMessages.length > 0 && (
@@ -465,9 +656,17 @@ function ProjectStudioView({
               )}
 
               {/* Candidates — Listening Room */}
-              {trackCandidates.length > 0 && (
+              {(trackCandidates.length > 0 || activeTrack) && (
                 <div className="ps-candidates">
-                  <h3 className="ps-section-title">Listening Room</h3>
+                  <div className="ps-prompt-header">
+                    <h3 className="ps-section-title">Listening Room</h3>
+                    <button
+                      className="secondary"
+                      onClick={() => activeTrack && onAddCandidateFromFile(activeTrack)}
+                    >
+                      + Add from file
+                    </button>
+                  </div>
                   {trackCandidates.map((candidate) => {
                     const isActive = activeCandidateId === candidate.id;
                     const isThisPlaying = isActive && isPlaying;
@@ -563,12 +762,6 @@ function ProjectStudioView({
                 </div>
               )}
 
-              {/* Manually add a candidate (when no executions exist) */}
-              {trackExecs.length > 0 && trackCandidates.length === 0 && (
-                <div className="ps-no-candidates">
-                  <p>No candidates yet — generating will add them here automatically.</p>
-                </div>
-              )}
             </>
           )}
         </main>
