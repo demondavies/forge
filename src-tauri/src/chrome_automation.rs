@@ -318,7 +318,7 @@ struct JsAutomationResult {
 // button, and reports back. Stops immediately and reports failure if
 // either the input or the button cannot be found.
 #[tauri::command]
-pub fn automate_suno_generate(tab_id: String, prompt_text: String) -> AutomationProgress {
+pub fn automate_suno_generate(tab_id: String, prompt_json: String) -> AutomationProgress {
     for port in CANDIDATE_PORTS {
         let Ok(targets) = list_raw_targets(port) else {
             continue;
@@ -331,9 +331,10 @@ pub fn automate_suno_generate(tab_id: String, prompt_text: String) -> Automation
             return failed(format!("Tab {tab_id} has no debugger connection available."));
         };
 
-        // JSON-encode the prompt so it embeds as a safe JS string literal.
-        let prompt_json = serde_json::to_string(&prompt_text).unwrap_or_else(|_| "\"\"".to_string());
-        let script = SUNO_AUTOMATE_SCRIPT.replace("PROMPT_JSON", &prompt_json);
+        // prompt_json is already valid JSON produced by serde_json on the TS
+        // side — substitute it directly as a JS literal (valid JSON is valid
+        // JS for all value types used here).
+        let script = SUNO_AUTOMATE_SCRIPT.replace("__PROMPT_JSON__", &prompt_json);
 
         return match evaluate_via_cdp(&ws_url, &script) {
             Ok(result_str) => match serde_json::from_str::<JsAutomationResult>(&result_str) {
@@ -523,57 +524,139 @@ pub fn poll_suno_new_songs(
 
 // ── Suno Generate Automation ──────────────────────────────────────────────────
 
-// Injected into the Suno Generate tab via Runtime.evaluate. Uses a
-// selector cascade so Suno UI changes don't immediately break it: more
-// specific placeholders first, plain "textarea" as the final fallback.
-// Fills with the React native-setter pattern so the framework sees the
-// value change. Returns JSON so the Rust caller can report each step
-// through the Production Console without parsing free-form strings.
+// Injected into the Suno Generate tab via Runtime.evaluate. Fills each
+// Suno field from the structured SunoPrompt JSON:
+//   title, lyricsMode ("Write"/"Prompt"/"Instrumental"), lyrics, styles,
+//   excludeStyles, weirdness (0-100), styleInfluence (0-100).
+//
+// Uses a resilient selector cascade for each field so minor Suno UI
+// changes don't break the whole script. Fills with the React
+// native-setter pattern (Object.getOwnPropertyDescriptor + dispatchEvent)
+// so the framework sees every change. Returns JSON so the Rust caller can
+// surface per-step status in the Production Console without string parsing.
+//
+// __PROMPT_JSON__ is replaced with the raw JSON object literal before
+// injection — valid JSON is valid JS for all types used here.
 const SUNO_AUTOMATE_SCRIPT: &str = r###"(() => {
-  const selectors = [
-    'textarea[placeholder*="Describe"]',
-    'textarea[placeholder*="describe"]',
-    'textarea[placeholder*="Enter"]',
-    'textarea[placeholder*="style"]',
-    'textarea[placeholder*="music"]',
-    'textarea[placeholder*="prompt"]',
-    'textarea[class*="prompt"]',
-    'textarea',
-  ];
+  const p = __PROMPT_JSON__;
+  const steps = [];
 
-  let input = null;
-  for (const sel of selectors) {
-    const el = document.querySelector(sel);
-    if (el) { input = el; break; }
+  function setNative(el, value) {
+    const proto = el.tagName === 'TEXTAREA'
+      ? HTMLTextAreaElement.prototype
+      : HTMLInputElement.prototype;
+    const setter = Object.getOwnPropertyDescriptor(proto, 'value')?.set;
+    if (setter) setter.call(el, value); else el.value = value;
+    el.dispatchEvent(new Event('input',  { bubbles: true }));
+    el.dispatchEvent(new Event('change', { bubbles: true }));
   }
 
-  if (!input) {
-    return JSON.stringify({ ok: false, message: "Unable to locate prompt input on Suno page." });
-  }
-
-  try {
-    const nativeSetter = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value')?.set;
-    if (nativeSetter) {
-      nativeSetter.call(input, PROMPT_JSON);
-    } else {
-      input.value = PROMPT_JSON;
+  function first(selectors) {
+    for (const sel of selectors) {
+      const el = document.querySelector(sel);
+      if (el) return el;
     }
-    input.dispatchEvent(new Event('input', { bubbles: true }));
-    input.dispatchEvent(new Event('change', { bubbles: true }));
-  } catch (e) {
-    return JSON.stringify({ ok: false, message: "Failed to fill prompt input: " + String(e) });
+    return null;
   }
 
+  // ── 1. Song title ─────────────────────────────────────────────────────────
+  if (p.title) {
+    const el = first([
+      'input[placeholder*="itle"]',
+      'input[aria-label*="itle"]',
+      'input[name*="itle"]',
+    ]);
+    if (el) { setNative(el, p.title); steps.push('Title set.'); }
+    else { steps.push('Title input not found — skipped.'); }
+  }
+
+  // ── 2. Lyrics mode toggle ─────────────────────────────────────────────────
+  // Suno shows "Write" / "Custom" (= Prompt) / "Instrumental" as buttons.
+  // Match "Prompt" against both "Prompt" and "Custom" labels.
+  const modeAliases = {
+    Write: ['Write'],
+    Prompt: ['Prompt', 'Custom'],
+    Instrumental: ['Instrumental'],
+  };
+  const targets = modeAliases[p.lyricsMode] || [p.lyricsMode];
+  const modeBtn = Array.from(
+    document.querySelectorAll('button, [role="tab"], [role="radio"]')
+  ).find(el => targets.some(t => (el.textContent || '').trim() === t));
+  if (modeBtn) { modeBtn.click(); steps.push('Mode "' + p.lyricsMode + '" clicked.'); }
+  else { steps.push('Mode "' + p.lyricsMode + '" button not found — skipped.'); }
+
+  // ── 3. Style tags input ───────────────────────────────────────────────────
+  if (p.styles !== undefined) {
+    const el = first([
+      'textarea[placeholder*="style"]',
+      'textarea[placeholder*="Style"]',
+      'input[placeholder*="style"]',
+      'input[placeholder*="Style"]',
+      'textarea[aria-label*="style"]',
+      'input[aria-label*="style"]',
+    ]);
+    if (el) { setNative(el, p.styles); steps.push('Styles set.'); }
+    else { steps.push('Styles input not found — skipped.'); }
+  }
+
+  // ── 4. Lyrics textarea (Write/Prompt only) ────────────────────────────────
+  if (p.lyricsMode !== 'Instrumental' && p.lyrics) {
+    const el = first([
+      'textarea[placeholder*="lyric"]',
+      'textarea[placeholder*="Lyric"]',
+      'textarea[placeholder*="Enter your"]',
+      'textarea[placeholder*="Write your"]',
+      'textarea[placeholder*="words"]',
+    ]);
+    if (el) { setNative(el, p.lyrics); steps.push('Lyrics set.'); }
+    else { steps.push('Lyrics textarea not found — skipped.'); }
+  }
+
+  // ── 5. Exclude styles ─────────────────────────────────────────────────────
+  if (p.excludeStyles !== undefined) {
+    const el = first([
+      'input[placeholder*="xclude"]',
+      'textarea[placeholder*="xclude"]',
+      'input[aria-label*="xclude"]',
+    ]);
+    if (el) { setNative(el, p.excludeStyles); steps.push('Exclude styles set.'); }
+    else { steps.push('Exclude input not found — skipped.'); }
+  }
+
+  // ── 6. Sliders (weirdness, style influence) ───────────────────────────────
+  function setSliderByLabel(labelFragment, value) {
+    const allText = Array.from(document.querySelectorAll('label, span, div, p'));
+    for (const node of allText) {
+      if ((node.textContent || '').trim().toLowerCase() !== labelFragment.toLowerCase()) continue;
+      const container = node.closest('[class*="slider"], [class*="control"], section, div');
+      if (!container) continue;
+      const slider = container.querySelector('input[type="range"]');
+      if (slider) { setNative(slider, String(value)); return true; }
+    }
+    return false;
+  }
+
+  const sliders = document.querySelectorAll('input[type="range"]');
+  if (!setSliderByLabel('weirdness', p.weirdness) && sliders[0]) {
+    setNative(sliders[0], String(p.weirdness));
+  }
+  steps.push('Weirdness set to ' + p.weirdness + '.');
+
+  if (!setSliderByLabel('style influence', p.styleInfluence) && sliders[1]) {
+    setNative(sliders[1], String(p.styleInfluence));
+  }
+  steps.push('Style influence set to ' + p.styleInfluence + '.');
+
+  // ── 7. Generate / Create button ───────────────────────────────────────────
   const genBtn = Array.from(document.querySelectorAll('button')).find(b => {
     const t = (b.textContent || '').trim().toLowerCase();
     return (t === 'create' || t.includes('generate')) && !b.disabled;
   });
-
   if (!genBtn) {
-    return JSON.stringify({ ok: false, message: "Unable to locate Generate button on Suno page." });
+    return JSON.stringify({ ok: false, message: 'Generate button not found. Steps: ' + steps.join(' ') });
   }
-
   genBtn.click();
-  return JSON.stringify({ ok: true, message: "Generate triggered." });
+  steps.push('Generate clicked.');
+  return JSON.stringify({ ok: true, message: steps.join(' ') });
 })()
 "###;

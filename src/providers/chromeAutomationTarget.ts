@@ -11,6 +11,7 @@
 // AutomationProgress comes back, unchanged.
 import { invoke } from "@tauri-apps/api/core";
 import type { AutomationProgress, BrowserAutomationTarget, BrowserAvailability } from "../hooks/browserAutomation";
+import type { SunoPrompt } from "../types";
 
 const CHROME_TARGET_ID = "chrome";
 
@@ -63,8 +64,9 @@ async function navigateTab(tabId: string, url: string): Promise<AutomationProgre
 // Suno Generate. Outside the frozen BrowserAutomationTarget interface
 // (page interaction is not modeled there), same extra-export relationship
 // that discoverChromeInstances has to discovery.
-export async function automateSunoPage(tabId: string, promptText: string): Promise<AutomationProgress> {
-  const progress = await invoke<AutomationProgress>("automate_suno_generate", { tabId, promptText });
+export async function automateSunoPage(tabId: string, prompt: SunoPrompt, title: string): Promise<AutomationProgress> {
+  const promptJson = JSON.stringify({ ...prompt, title });
+  const progress = await invoke<AutomationProgress>("automate_suno_generate", { tabId, promptJson });
   return rememberAvailabilityFrom(progress);
 }
 
