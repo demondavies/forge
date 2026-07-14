@@ -650,7 +650,7 @@ function App() {
   }
 
   function openProjectStudio(id: string) {
-    setActiveSection("project-studio");
+    setActiveSection("projects");
     selectProject(id);
   }
 
@@ -888,7 +888,6 @@ function App() {
         onFinishTrack={finishTrack}
         onReopenTrack={reopenTrack}
         onOpenAlbumProduction={openAlbumProduction}
-        onOpenProjectStudio={openProjectStudio}
         onSaveAndGenerateTrack={handleSaveAndGenerateTrack}
         selectedTrackId={selectedTrackId}
         onOpenTrackWorkspace={openTrackWorkspace}

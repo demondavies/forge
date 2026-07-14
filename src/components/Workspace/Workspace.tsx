@@ -196,9 +196,6 @@ interface WorkspaceProps {
   // "Open Album Production" button rendered alongside Music Workspace
   // below. Same shape as onOpenPromptStudio/onOpenMusicWorkspace.
   onOpenAlbumProduction: (id: string) => void;
-  // Opens Project Studio for one project — the unified three-column
-  // creative workspace that replaces the scattered Music Workspace sections.
-  onOpenProjectStudio: (id: string) => void;
   // Project Studio's generate-in-one-action callback — saves the prompt,
   // attributes it, queues execution, and starts CDP delivery, all from a
   // single button press.
@@ -338,7 +335,6 @@ function Workspace({
   onFinishTrack,
   onReopenTrack,
   onOpenAlbumProduction,
-  onOpenProjectStudio,
   onSaveAndGenerateTrack,
   selectedTrackId,
   onOpenTrackWorkspace,
@@ -385,33 +381,48 @@ function Workspace({
         </p>
       </header>
 
-      {section === "projects" && (
-        <ProjectsView
-          projects={projects}
-          selectedProjectId={selectedProjectId}
-          onSelectProject={onSelectProject}
-          onCreateProject={onCreateProject}
-          assets={assets}
-          knowledgeEntries={knowledgeEntries}
-          releases={releases}
-          captures={captures}
-          identities={identities}
-          activities={activities}
-          onAddAsset={onAddAsset}
-          onCaptureKnowledge={onCaptureKnowledge}
-          onCreateRelease={onCreateRelease}
-          getRelationshipsFor={getRelationshipsFor}
-          onDiscoverRelationships={onDiscoverRelationships}
-          onConfirmRelationship={onConfirmRelationship}
-          onDismissRelationship={onDismissRelationship}
-          onConnectTo={onConnectTo}
-          onOpenAsset={onOpenAsset}
-          onOpenKnowledgeEntry={onOpenKnowledgeEntry}
-          onOpenRelease={onOpenRelease}
-          onOpenMusicWorkspace={onOpenMusicWorkspace}
-          onOpenProjectStudio={onOpenProjectStudio}
-        />
-      )}
+      {section === "projects" &&
+        (() => {
+          const studioProject = projects.find((p) => p.id === selectedProjectId);
+          if (studioProject) {
+            return (
+              <ProjectStudioView
+                project={studioProject}
+                identity={identity}
+                plannedTracks={plannedTracks}
+                attributions={attributions}
+                knowledgeEntries={knowledgeEntries}
+                executions={executions}
+                candidates={candidates}
+                onPlanTrack={onPlanTrack}
+                onUpdateTrack={onUpdateTrack}
+                onRemoveTrack={onRemoveTrack}
+                onFinishTrack={onFinishTrack}
+                onReopenTrack={onReopenTrack}
+                onSaveKnowledge={onSaveKnowledge}
+                onAttributePrompt={onAttributePrompt}
+                getAttributedTrackId={getAttributedTrackId}
+                onApproveCandidate={onApproveCandidate}
+                onRejectCandidate={onRejectCandidate}
+                onSetCurrentBest={onSetCurrentBest}
+                onSetAlbumVersion={onSetAlbumVersion}
+                onAddNote={onAddNote}
+                onSaveAndGenerateTrack={onSaveAndGenerateTrack}
+                consoleMessages={consoleMessages}
+                onClearConsole={onClearConsole}
+                onLog={onLog}
+                onBack={() => onSelectProject(null)}
+              />
+            );
+          }
+          return (
+            <ProjectsView
+              projects={projects}
+              onSelectProject={onSelectProject}
+              onCreateProject={onCreateProject}
+            />
+          );
+        })()}
 
       {/* Same guard and "select + switch section" contract as above
           above — openMusicWorkspace (App.tsx) always selects the project
@@ -1059,42 +1070,6 @@ function Workspace({
           <UpdaterPanel />
         </>
       )}
-
-      {section === "project-studio" &&
-        (() => {
-          const studioProject = projects.find((candidate) => candidate.id === selectedProjectId);
-          if (!studioProject) return null;
-
-          return (
-            <ProjectStudioView
-              project={studioProject}
-              identity={identity}
-              plannedTracks={plannedTracks}
-              attributions={attributions}
-              knowledgeEntries={knowledgeEntries}
-              executions={executions}
-              candidates={candidates}
-              onPlanTrack={onPlanTrack}
-              onUpdateTrack={onUpdateTrack}
-              onRemoveTrack={onRemoveTrack}
-              onFinishTrack={onFinishTrack}
-              onReopenTrack={onReopenTrack}
-              onSaveKnowledge={onSaveKnowledge}
-              onAttributePrompt={onAttributePrompt}
-              getAttributedTrackId={getAttributedTrackId}
-              onApproveCandidate={onApproveCandidate}
-              onRejectCandidate={onRejectCandidate}
-              onSetCurrentBest={onSetCurrentBest}
-              onSetAlbumVersion={onSetAlbumVersion}
-              onAddNote={onAddNote}
-              onSaveAndGenerateTrack={onSaveAndGenerateTrack}
-              consoleMessages={consoleMessages}
-              onClearConsole={onClearConsole}
-              onLog={onLog}
-              onBack={() => onOpenProject(studioProject.id)}
-            />
-          );
-        })()}
 
       {section === "overview" && (
         <StudioDashboardView
