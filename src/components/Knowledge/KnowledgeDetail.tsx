@@ -36,6 +36,7 @@ interface KnowledgeDetailProps {
   onConfirmRelationship: (id: string) => void;
   onDismissRelationship: (id: string) => void;
   onConnectTo: (ref: ObjectRef, label: string) => void;
+  onRemoveEntry: (id: string) => void;
 }
 
 // Forge's "Context Everywhere" surface for a single knowledge entry —
@@ -60,6 +61,7 @@ function KnowledgeDetail({
   onConfirmRelationship,
   onDismissRelationship,
   onConnectTo,
+  onRemoveEntry,
 }: KnowledgeDetailProps) {
   const project = entry.projectId
     ? (projects.find((candidate) => candidate.id === entry.projectId) ?? null)
@@ -110,9 +112,17 @@ function KnowledgeDetail({
 
   return (
     <div className="detail-view">
-      <button className="back-btn" onClick={onBack}>
-        ← Back to Knowledge
-      </button>
+      <div className="detail-nav-row">
+        <button className="back-btn" onClick={onBack}>
+          ← Back to Knowledge
+        </button>
+        <button
+          className="detail-remove-btn"
+          onClick={() => { onRemoveEntry(entry.id); onBack(); }}
+        >
+          Remove
+        </button>
+      </div>
 
       <header className="detail-header">
         <div className="detail-title-row">

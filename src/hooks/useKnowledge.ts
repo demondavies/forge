@@ -88,6 +88,11 @@ export function useKnowledge(activeIdentityId: string | null) {
     return { error: null, entry: newEntry };
   }
 
+  function removeEntry(id: string) {
+    setEntries((current) => current.filter((e) => e.id !== id));
+    if (selectedEntryId === id) setSelectedEntryId(null);
+  }
+
   return {
     entries: entriesForActiveIdentity,
     // The full, unfiltered list across every identity — needed by anything
@@ -97,5 +102,6 @@ export function useKnowledge(activeIdentityId: string | null) {
     selectedEntry,
     selectEntry,
     captureKnowledge,
+    removeEntry,
   };
 }

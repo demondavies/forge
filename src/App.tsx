@@ -81,6 +81,7 @@ function App() {
     selectedEntry: selectedKnowledgeEntry,
     selectEntry,
     captureKnowledge,
+    removeEntry: removeKnowledgeEntry,
   } = useKnowledge(selectedIdentity?.id ?? null);
   const { assets, allAssets, selectedAsset, selectAsset, createAsset, removeAsset } = useAssets(
     selectedIdentity?.id ?? null,
@@ -829,6 +830,7 @@ function App() {
         onCaptureKnowledge={() => setIsCaptureKnowledgeOpen(true)}
         selectedKnowledgeEntry={selectedKnowledgeEntry}
         onSelectKnowledgeEntry={selectEntry}
+        onRemoveKnowledgeEntry={removeKnowledgeEntry}
         assets={assets}
         onAddAsset={() => setIsCreateAssetOpen(true)}
         onImportAudio={handleImportAudio}

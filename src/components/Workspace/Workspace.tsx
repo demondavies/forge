@@ -84,6 +84,7 @@ interface WorkspaceProps {
   onCaptureKnowledge: () => void;
   selectedKnowledgeEntry: KnowledgeEntry | null;
   onSelectKnowledgeEntry: (id: string | null) => void;
+  onRemoveKnowledgeEntry: (id: string) => void;
   assets: Asset[];
   onAddAsset: () => void;
   onImportAudio: () => void;
@@ -283,6 +284,7 @@ function Workspace({
   onCaptureKnowledge,
   selectedKnowledgeEntry,
   onSelectKnowledgeEntry,
+  onRemoveKnowledgeEntry,
   assets,
   onAddAsset,
   onImportAudio,
@@ -887,6 +889,7 @@ function Workspace({
           onImportVault={onImportVault}
           selectedEntry={selectedKnowledgeEntry}
           onSelectEntry={onSelectKnowledgeEntry}
+          onRemoveEntry={onRemoveKnowledgeEntry}
           identities={identities}
           assets={assets}
           releases={releases}

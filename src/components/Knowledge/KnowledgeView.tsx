@@ -37,6 +37,7 @@ interface KnowledgeViewProps {
   onConfirmRelationship: (id: string) => void;
   onDismissRelationship: (id: string) => void;
   onConnectTo: (ref: ObjectRef, label: string) => void;
+  onRemoveEntry: (id: string) => void;
 }
 
 // The whole "Knowledge" section of the workspace: a toolbar with the
@@ -65,6 +66,7 @@ function KnowledgeView({
   onConfirmRelationship,
   onDismissRelationship,
   onConnectTo,
+  onRemoveEntry,
 }: KnowledgeViewProps) {
   if (selectedEntry) {
     return (
@@ -85,6 +87,7 @@ function KnowledgeView({
         onConfirmRelationship={onConfirmRelationship}
         onDismissRelationship={onDismissRelationship}
         onConnectTo={onConnectTo}
+        onRemoveEntry={onRemoveEntry}
       />
     );
   }
