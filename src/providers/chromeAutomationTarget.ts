@@ -68,6 +68,29 @@ export async function automateSunoPage(tabId: string, promptText: string): Promi
   return rememberAvailabilityFrom(progress);
 }
 
+export interface SunoSongPollResult {
+  status: "Completed" | "Timeout" | "Error";
+  detail: string;
+  uuids: string[];
+}
+
+// "Snapshot the UUIDs of every song card currently on the Suno page" —
+// call before triggering generation to build the known-ids baseline.
+export async function snapshotSunoSongIds(tabId: string): Promise<SunoSongPollResult> {
+  return invoke<SunoSongPollResult>("snapshot_suno_song_ids", { tabId });
+}
+
+// "Wait until new Suno songs are ready for download" — polls the DOM for
+// new song UUIDs, then polls the CDN until the audio files are accessible.
+// Returns "Completed" with ready UUIDs, or "Timeout" if time runs out.
+export async function pollSunoNewSongs(
+  tabId: string,
+  knownIds: string[],
+  timeoutSeconds: number,
+): Promise<SunoSongPollResult> {
+  return invoke<SunoSongPollResult>("poll_suno_new_songs", { tabId, knownIds, timeoutSeconds });
+}
+
 // The one object this file exposes to the framework — a plain
 // implementation of BrowserAutomationTarget, nothing more. Registered via
 // registerBrowserAutomationTargets.ts (see that file's own comment),

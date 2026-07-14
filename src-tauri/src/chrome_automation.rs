@@ -350,6 +350,179 @@ pub fn automate_suno_generate(tab_id: String, prompt_text: String) -> Automation
     ))
 }
 
+// ── Suno Song Poller ─────────────────────────────────────────────────────────
+
+// Extracts all song UUIDs currently visible on the Suno page by collecting
+// every <a href="/song/{uuid}"> link. Called before and after generation so
+// the caller can diff the two sets to identify newly created songs.
+const SUNO_SNAPSHOT_SCRIPT: &str = r###"(() => {
+  const links = Array.from(document.querySelectorAll('a[href*="/song/"]'));
+  const uuids = links.flatMap(a => {
+    const href = a.getAttribute('href') || '';
+    const m = href.match(/\/song\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i);
+    return m ? [m[1]] : [];
+  });
+  return JSON.stringify([...new Set(uuids)]);
+})()
+"###;
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct SunoSongPollResult {
+    pub status: String, // "Completed" | "Timeout" | "Error"
+    pub detail: String,
+    pub uuids: Vec<String>,
+}
+
+// "Snapshot the UUIDs of every song card currently on the Suno page" —
+// used to take a before-generation baseline so poll_suno_new_songs knows
+// which songs to ignore. Runs the snapshot script once and returns
+// immediately; it does not poll.
+#[tauri::command]
+pub fn snapshot_suno_song_ids(tab_id: String) -> SunoSongPollResult {
+    for port in CANDIDATE_PORTS {
+        let Ok(targets) = list_raw_targets(port) else {
+            continue;
+        };
+        let Some(target) = targets.into_iter().find(|t| t.id == tab_id) else {
+            continue;
+        };
+        let Some(ws_url) = target.websocket_debugger_url else {
+            return SunoSongPollResult {
+                status: "Error".to_string(),
+                detail: format!("Tab {tab_id} has no debugger connection."),
+                uuids: vec![],
+            };
+        };
+        return match evaluate_via_cdp(&ws_url, SUNO_SNAPSHOT_SCRIPT) {
+            Ok(json) => {
+                let uuids: Vec<String> = serde_json::from_str(&json).unwrap_or_default();
+                SunoSongPollResult {
+                    status: "Completed".to_string(),
+                    detail: format!("Snapshotted {} song(s).", uuids.len()),
+                    uuids,
+                }
+            }
+            Err(e) => SunoSongPollResult {
+                status: "Error".to_string(),
+                detail: format!("CDP evaluate failed: {e}"),
+                uuids: vec![],
+            },
+        };
+    }
+    SunoSongPollResult {
+        status: "Error".to_string(),
+        detail: format!("No open tab with id \"{tab_id}\" was found."),
+        uuids: vec![],
+    }
+}
+
+// "Wait until new Suno songs are ready for download" — two-stage poll:
+//
+// Stage 1 (fast, ~2-10 s): polls the DOM every 3 s until at least 2 song
+// UUIDs that aren't in known_ids appear as <a href="/song/…"> links.
+// Suno assigns UUIDs before generation completes, so these appear quickly.
+//
+// Stage 2 (slow, up to timeout): for each new UUID, HEAD-checks its CDN
+// URL every 5 s until the file exists (HTTP 200). The audio becomes
+// available only after generation finishes (typically 30-90 s).
+//
+// Returns "Completed" with the ready UUIDs, or "Timeout" if either stage
+// runs out of time.
+#[tauri::command]
+pub fn poll_suno_new_songs(
+    tab_id: String,
+    known_ids: Vec<String>,
+    timeout_seconds: u64,
+) -> SunoSongPollResult {
+    use std::time::{Duration, Instant};
+
+    let deadline = Instant::now() + Duration::from_secs(timeout_seconds);
+
+    // Resolve the WebSocket URL once — the debugger URL is stable for the
+    // lifetime of the tab, so we only need to query /json/list once.
+    let mut ws_url_opt: Option<String> = None;
+    for port in CANDIDATE_PORTS {
+        let Ok(targets) = list_raw_targets(port) else {
+            continue;
+        };
+        if let Some(target) = targets.into_iter().find(|t| t.id == tab_id) {
+            ws_url_opt = target.websocket_debugger_url;
+            break;
+        }
+    }
+    let Some(ws_url) = ws_url_opt else {
+        return SunoSongPollResult {
+            status: "Error".to_string(),
+            detail: format!("No open tab with id \"{tab_id}\" was found."),
+            uuids: vec![],
+        };
+    };
+
+    // Stage 1: wait for new song UUIDs to appear in the DOM.
+    let mut new_uuids: Vec<String> = vec![];
+    while Instant::now() < deadline {
+        std::thread::sleep(Duration::from_secs(3));
+        if let Ok(json) = evaluate_via_cdp(&ws_url, SUNO_SNAPSHOT_SCRIPT) {
+            let all_ids: Vec<String> = serde_json::from_str(&json).unwrap_or_default();
+            new_uuids = all_ids
+                .into_iter()
+                .filter(|id| !known_ids.contains(id))
+                .collect();
+            if new_uuids.len() >= 2 {
+                break;
+            }
+        }
+    }
+
+    if new_uuids.is_empty() {
+        return SunoSongPollResult {
+            status: "Timeout".to_string(),
+            detail: "No new songs appeared on the Suno page within the timeout.".to_string(),
+            uuids: vec![],
+        };
+    }
+
+    // Stage 2: for each new UUID, wait until its CDN audio file exists.
+    let mut ready_uuids: Vec<String> = vec![];
+    for uuid in &new_uuids {
+        let cdn_url = format!("https://cdn1.suno.ai/{uuid}.mp3");
+        let mut is_ready = false;
+        while Instant::now() < deadline {
+            match ureq::request("HEAD", &cdn_url)
+                .timeout(Duration::from_secs(5))
+                .call()
+            {
+                Ok(_) => {
+                    is_ready = true;
+                    break;
+                }
+                Err(_) => {
+                    std::thread::sleep(Duration::from_secs(5));
+                }
+            }
+        }
+        if is_ready {
+            ready_uuids.push(uuid.clone());
+        }
+    }
+
+    if ready_uuids.is_empty() {
+        return SunoSongPollResult {
+            status: "Timeout".to_string(),
+            detail: "Songs appeared but audio was not ready before timeout.".to_string(),
+            uuids: new_uuids,
+        };
+    }
+
+    SunoSongPollResult {
+        status: "Completed".to_string(),
+        detail: format!("{} song(s) ready for download.", ready_uuids.len()),
+        uuids: ready_uuids,
+    }
+}
+
+// ── Suno Generate Automation ──────────────────────────────────────────────────
+
 // Injected into the Suno Generate tab via Runtime.evaluate. Uses a
 // selector cascade so Suno UI changes don't immediately break it: more
 // specific placeholders first, plain "textarea" as the final fallback.

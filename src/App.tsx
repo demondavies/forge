@@ -48,6 +48,7 @@ import { requestExecutionReport } from "./hooks/executionProviders";
 import { outputsToCandidateInputs } from "./hooks/candidateImport";
 import { resolveGenerationProvider, resolveTrackPromptVersion } from "./hooks/generationRequest";
 import { deliverPromptForTrack } from "./hooks/promptDeliveryEngine";
+import type { ProjectDownloadContext } from "./hooks/promptDeliveryEngine";
 import type { SaveAndGenerateResult } from "./components/ProjectStudio/ProjectStudioView";
 import { useProductionConsole } from "./hooks/useProductionConsole";
 import { useWorkspaceSurface } from "./hooks/useWorkspaceSurface";
@@ -379,6 +380,10 @@ function App() {
     // how to title it) is this function's decision, not the engine's.
     clearConsole();
     const executionId = execResult.execution.id;
+    const trackProject = projects.find((p) => p.id === track.projectId);
+    const projectContext: ProjectDownloadContext | undefined = trackProject
+      ? { projectType: trackProject.type, projectName: trackProject.name }
+      : undefined;
     void deliverPromptForTrack(
       track,
       attributions,
@@ -395,6 +400,7 @@ function App() {
           addConsoleMessage("Manual import may be required.");
         }
       },
+      projectContext,
     );
 
     return { queued: true, message: `Queued "${promptVersion.title}" for generation — ${providerNote}.` };
@@ -444,6 +450,10 @@ function App() {
     clearConsole();
     void (async () => {
       for (const { track, executionId } of deliveryQueue) {
+        const albumProject = projects.find((p) => p.id === track.projectId);
+        const albumProjectContext: ProjectDownloadContext | undefined = albumProject
+          ? { projectType: albumProject.type, projectName: albumProject.name }
+          : undefined;
         await deliverPromptForTrack(
           track,
           attributions,
@@ -460,6 +470,7 @@ function App() {
               addConsoleMessage("Manual import may be required.");
             }
           },
+          albumProjectContext,
         );
       }
     })();
@@ -512,6 +523,10 @@ function App() {
 
     clearConsole();
     const executionId = execResult.execution.id;
+    const studioProject = projects.find((p) => p.id === track.projectId);
+    const studioProjectContext: ProjectDownloadContext | undefined = studioProject
+      ? { projectType: studioProject.type, projectName: studioProject.name }
+      : undefined;
     void deliverPromptForTrack(
       track,
       freshAttributions,
@@ -528,6 +543,7 @@ function App() {
           addConsoleMessage("Manual import may be required.");
         }
       },
+      studioProjectContext,
     );
 
     return { queued: true, message: `Generating "${track.title}" — ${providerNote}.` };

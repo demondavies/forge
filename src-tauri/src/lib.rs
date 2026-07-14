@@ -6,6 +6,7 @@ fn greet(name: &str) -> String {
 
 mod chrome_automation;
 mod download_watcher;
+mod forge_downloads;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -22,8 +23,11 @@ pub fn run() {
             chrome_automation::activate_chrome_tab,
             chrome_automation::navigate_chrome_tab,
             chrome_automation::automate_suno_generate,
+            chrome_automation::snapshot_suno_song_ids,
+            chrome_automation::poll_suno_new_songs,
             download_watcher::snapshot_downloads_folder,
             download_watcher::watch_for_download,
+            forge_downloads::download_forge_track,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
