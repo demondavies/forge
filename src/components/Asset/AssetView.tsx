@@ -31,6 +31,7 @@ interface AssetViewProps {
   onConfirmRelationship: (id: string) => void;
   onDismissRelationship: (id: string) => void;
   onConnectTo: (ref: ObjectRef, label: string) => void;
+  onRemoveAsset: (id: string) => void;
 }
 
 // The whole "Assets" section of the workspace: a toolbar with the
@@ -55,6 +56,7 @@ function AssetView({
   onConfirmRelationship,
   onDismissRelationship,
   onConnectTo,
+  onRemoveAsset,
 }: AssetViewProps) {
   if (selectedAsset) {
     return (
@@ -75,6 +77,7 @@ function AssetView({
         onConfirmRelationship={onConfirmRelationship}
         onDismissRelationship={onDismissRelationship}
         onConnectTo={onConnectTo}
+        onRemoveAsset={onRemoveAsset}
       />
     );
   }

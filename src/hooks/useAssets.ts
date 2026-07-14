@@ -80,6 +80,11 @@ export function useAssets(activeIdentityId: string | null) {
     return { error: null, asset: newAsset };
   }
 
+  function removeAsset(id: string) {
+    setAssets((current) => current.filter((a) => a.id !== id));
+    if (selectedAssetId === id) setSelectedAssetId(null);
+  }
+
   return {
     assets: assetsForActiveIdentity,
     // The full, unfiltered list across every identity — needed by anything
@@ -89,5 +94,6 @@ export function useAssets(activeIdentityId: string | null) {
     selectedAsset,
     selectAsset,
     createAsset,
+    removeAsset,
   };
 }

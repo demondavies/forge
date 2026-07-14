@@ -96,6 +96,7 @@ interface WorkspaceProps {
   onDetachResource: (resourceId: string, trackId: string) => void;
   selectedAsset: Asset | null;
   onSelectAsset: (id: string | null) => void;
+  onRemoveAsset: (id: string) => void;
   releases: Release[];
   onCreateRelease: () => void;
   selectedRelease: Release | null;
@@ -294,6 +295,7 @@ function Workspace({
   onDetachResource,
   selectedAsset,
   onSelectAsset,
+  onRemoveAsset,
   releases,
   onCreateRelease,
   selectedRelease,
@@ -906,6 +908,7 @@ function Workspace({
           onAddAsset={onAddAsset}
           selectedAsset={selectedAsset}
           onSelectAsset={onSelectAsset}
+          onRemoveAsset={onRemoveAsset}
           identities={identities}
           knowledgeEntries={knowledgeEntries}
           releases={releases}

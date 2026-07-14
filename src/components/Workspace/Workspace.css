@@ -198,6 +198,28 @@
   gap: 24px;
 }
 
+.detail-nav-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.detail-remove-btn {
+  background: none;
+  border: 1px solid #c0392b;
+  color: #c0392b;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.detail-remove-btn:hover {
+  background: #c0392b;
+  color: #fff;
+}
+
 .detail-header {
   display: flex;
   flex-direction: column;

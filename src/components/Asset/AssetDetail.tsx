@@ -33,6 +33,7 @@ interface AssetDetailProps {
   onConfirmRelationship: (id: string) => void;
   onDismissRelationship: (id: string) => void;
   onConnectTo: (ref: ObjectRef, label: string) => void;
+  onRemoveAsset: (id: string) => void;
 }
 
 // Forge's "Context Everywhere" surface for a single asset — reached by
@@ -55,6 +56,7 @@ function AssetDetail({
   onConfirmRelationship,
   onDismissRelationship,
   onConnectTo,
+  onRemoveAsset,
 }: AssetDetailProps) {
   const project = projects.find((candidate) => candidate.id === asset.projectId) ?? null;
 
@@ -97,9 +99,17 @@ function AssetDetail({
 
   return (
     <div className="detail-view">
-      <button className="back-btn" onClick={onBack}>
-        ← Back to Assets
-      </button>
+      <div className="detail-nav-row">
+        <button className="back-btn" onClick={onBack}>
+          ← Back to Assets
+        </button>
+        <button
+          className="detail-remove-btn"
+          onClick={() => { onRemoveAsset(asset.id); onBack(); }}
+        >
+          Remove
+        </button>
+      </div>
 
       <header className="detail-header">
         <div className="detail-title-row">

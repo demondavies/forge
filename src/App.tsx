@@ -82,7 +82,7 @@ function App() {
     selectEntry,
     captureKnowledge,
   } = useKnowledge(selectedIdentity?.id ?? null);
-  const { assets, allAssets, selectedAsset, selectAsset, createAsset } = useAssets(
+  const { assets, allAssets, selectedAsset, selectAsset, createAsset, removeAsset } = useAssets(
     selectedIdentity?.id ?? null,
   );
   const { releases, allReleases, selectedRelease, selectRelease, createRelease } = useReleases(
@@ -841,6 +841,7 @@ function App() {
         onDetachResource={handleDetachResource}
         selectedAsset={selectedAsset}
         onSelectAsset={selectAsset}
+        onRemoveAsset={removeAsset}
         releases={releases}
         onCreateRelease={() => setIsCreateReleaseOpen(true)}
         selectedRelease={selectedRelease}
