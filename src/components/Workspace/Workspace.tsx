@@ -42,6 +42,8 @@ import RegisteredProvidersView from "../Providers/RegisteredProvidersView";
 import type { QueueExecutionInput, QueueExecutionResult } from "../../hooks/useStudioQueue";
 import AlbumProductionView from "../Album/AlbumProductionView";
 import type { PlanTrackInput, PlanTrackResult } from "../../hooks/usePlannedTracks";
+import ProjectStudioView from "../ProjectStudio/ProjectStudioView";
+import type { SaveAndGenerateResult } from "../ProjectStudio/ProjectStudioView";
 import TrackWorkspaceView from "../TrackWorkspace/TrackWorkspaceView";
 import ProducerCompanionPanel from "../TrackWorkspace/ProducerCompanionPanel";
 import { analyzeTrack } from "../../hooks/producerCompanion";
@@ -184,6 +186,7 @@ interface WorkspaceProps {
   // to one project.
   plannedTracks: PlannedTrack[];
   onPlanTrack: (input: PlanTrackInput) => PlanTrackResult;
+  onUpdateTrack: (id: string, updates: { title?: string; description?: string }) => void;
   onRemoveTrack: (id: string) => void;
   onFinishTrack: (id: string) => void;
   onReopenTrack: (id: string) => void;
@@ -191,6 +194,13 @@ interface WorkspaceProps {
   // "Open Album Production" button rendered alongside Music Workspace
   // below. Same shape as onOpenPromptStudio/onOpenMusicWorkspace.
   onOpenAlbumProduction: (id: string) => void;
+  // Opens Project Studio for one project — the unified three-column
+  // creative workspace that replaces the scattered Music Workspace sections.
+  onOpenProjectStudio: (id: string) => void;
+  // Project Studio's generate-in-one-action callback — saves the prompt,
+  // attributes it, queues execution, and starts CDP delivery, all from a
+  // single button press.
+  onSaveAndGenerateTrack: (track: PlannedTrack, promptText: string) => SaveAndGenerateResult;
   // Which planned track Track Workspace is currently open for (owned by
   // App.tsx) — null the rest of the time, including every ordinary visit
   // to any other section. A project can have many planned tracks, so this
@@ -319,10 +329,13 @@ function Workspace({
   onRemoveExecution,
   plannedTracks,
   onPlanTrack,
+  onUpdateTrack,
   onRemoveTrack,
   onFinishTrack,
   onReopenTrack,
   onOpenAlbumProduction,
+  onOpenProjectStudio,
+  onSaveAndGenerateTrack,
   selectedTrackId,
   onOpenTrackWorkspace,
   attributions,
@@ -392,6 +405,7 @@ function Workspace({
           onOpenKnowledgeEntry={onOpenKnowledgeEntry}
           onOpenRelease={onOpenRelease}
           onOpenMusicWorkspace={onOpenMusicWorkspace}
+          onOpenProjectStudio={onOpenProjectStudio}
         />
       )}
 
@@ -1039,6 +1053,42 @@ function Workspace({
           <UpdaterPanel />
         </>
       )}
+
+      {section === "project-studio" &&
+        (() => {
+          const studioProject = projects.find((candidate) => candidate.id === selectedProjectId);
+          if (!studioProject) return null;
+
+          return (
+            <ProjectStudioView
+              project={studioProject}
+              identity={identity}
+              plannedTracks={plannedTracks}
+              attributions={attributions}
+              knowledgeEntries={knowledgeEntries}
+              executions={executions}
+              candidates={candidates}
+              onPlanTrack={onPlanTrack}
+              onUpdateTrack={onUpdateTrack}
+              onRemoveTrack={onRemoveTrack}
+              onFinishTrack={onFinishTrack}
+              onReopenTrack={onReopenTrack}
+              onSaveKnowledge={onSaveKnowledge}
+              onAttributePrompt={onAttributePrompt}
+              getAttributedTrackId={getAttributedTrackId}
+              onApproveCandidate={onApproveCandidate}
+              onRejectCandidate={onRejectCandidate}
+              onSetCurrentBest={onSetCurrentBest}
+              onSetAlbumVersion={onSetAlbumVersion}
+              onAddNote={onAddNote}
+              onSaveAndGenerateTrack={onSaveAndGenerateTrack}
+              consoleMessages={consoleMessages}
+              onClearConsole={onClearConsole}
+              onLog={onLog}
+              onBack={() => onOpenProject(studioProject.id)}
+            />
+          );
+        })()}
 
       {section === "overview" && (
         <StudioDashboardView

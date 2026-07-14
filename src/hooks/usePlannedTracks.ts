@@ -24,6 +24,7 @@ function loadTracks(): PlannedTrack[] {
 export interface PlanTrackInput {
   projectId: string;
   title: string;
+  description?: string;
 }
 
 // planTrack() can fail validation, so instead of throwing it returns this
@@ -75,6 +76,7 @@ export function usePlannedTracks(activeIdentityId: string | null) {
       identityId: activeIdentityId,
       projectId: input.projectId,
       title: trimmedTitle,
+      description: input.description,
       createdAt: new Date(),
     };
 
@@ -105,6 +107,12 @@ export function usePlannedTracks(activeIdentityId: string | null) {
     );
   }
 
+  function updateTrack(id: string, updates: { title?: string; description?: string }) {
+    setTracks((current) =>
+      current.map((track) => (track.id === id ? { ...track, ...updates } : track)),
+    );
+  }
+
   return {
     tracks: tracksForActiveIdentity,
     // The full, unfiltered list across every identity — kept for parity
@@ -114,5 +122,6 @@ export function usePlannedTracks(activeIdentityId: string | null) {
     removeTrack,
     finishTrack,
     reopenTrack,
+    updateTrack,
   };
 }

@@ -48,6 +48,7 @@ import { requestExecutionReport } from "./hooks/executionProviders";
 import { outputsToCandidateInputs } from "./hooks/candidateImport";
 import { resolveGenerationProvider, resolveTrackPromptVersion } from "./hooks/generationRequest";
 import { deliverPromptForTrack } from "./hooks/promptDeliveryEngine";
+import type { SaveAndGenerateResult } from "./components/ProjectStudio/ProjectStudioView";
 import { useProductionConsole } from "./hooks/useProductionConsole";
 import { useWorkspaceSurface } from "./hooks/useWorkspaceSurface";
 import { useCommandPalette } from "./hooks/useCommandPalette";
@@ -105,7 +106,7 @@ function App() {
   // logging wrapper here either, for the same reason: Activity is part of
   // the Creative Knowledge Engine, off-limits to extend this sprint, and
   // planning/removing a track isn't one of its existing ActivityTypes.
-  const { tracks: plannedTracks, planTrack, removeTrack, finishTrack, reopenTrack } = usePlannedTracks(selectedIdentity?.id ?? null);
+  const { tracks: plannedTracks, planTrack, removeTrack, finishTrack, reopenTrack, updateTrack } = usePlannedTracks(selectedIdentity?.id ?? null);
 
   // Prompt Attribution's own state — the same reasoning as Studio Queue
   // and Album Production: a creator's own declared choice is real,
@@ -471,6 +472,67 @@ function App() {
     };
   }
 
+  // Project Studio's generate flow: saves the prompt as a new version,
+  // attributes it to the track, queues execution, and starts CDP delivery
+  // — all in one action, using synchronously-returned values to build
+  // fresh arrays for deliverPromptForTrack so it always sees the new entry.
+  function handleSaveAndGenerateTrack(track: PlannedTrack, promptText: string): SaveAndGenerateResult {
+    const trackAttrList = attributions.filter((a) => a.trackId === track.id);
+    const attrVersionIds = new Set(trackAttrList.map((a) => a.promptVersionId));
+    const trackVersionCount = knowledgeEntries.filter(
+      (e) => e.projectId === track.projectId && attrVersionIds.has(e.id),
+    ).length;
+
+    const saveResult = handleCaptureKnowledge({
+      title: `${track.title} - Prompt v${trackVersionCount + 1}`,
+      insight: promptText,
+      source: "Experiment",
+      projectId: track.projectId,
+    });
+    if (!saveResult.entry) {
+      return { queued: false, message: saveResult.error ?? "Could not save prompt." };
+    }
+
+    const attrResult = attributePrompt({ promptVersionId: saveResult.entry.id, trackId: track.id });
+    if (!attrResult.attribution) {
+      return { queued: false, message: attrResult.error ?? "Could not attribute prompt." };
+    }
+
+    const execResult = queueExecution({ projectId: track.projectId, promptVersionId: saveResult.entry.id });
+    if (!execResult.execution) {
+      return { queued: false, message: execResult.error ?? "Could not queue generation." };
+    }
+
+    const resolution = resolveGenerationProvider();
+    const providerNote =
+      resolution.source === "none" ? "no execution provider is available yet" : `Forge will use ${resolution.displayName}`;
+
+    const freshKnowledge = [...knowledgeEntries, saveResult.entry];
+    const freshAttributions = [...attributions, attrResult.attribution];
+
+    clearConsole();
+    const executionId = execResult.execution.id;
+    void deliverPromptForTrack(
+      track,
+      freshAttributions,
+      freshKnowledge,
+      addConsoleMessage,
+      (filename, filePath) => {
+        void filename;
+        const importResult = addCandidate({ executionId, title: track.title, filePath });
+        if (importResult.candidate) {
+          addConsoleMessage("Candidate imported.");
+          addConsoleMessage("Ready for review.");
+        } else {
+          addConsoleMessage("Downloaded file could not be associated with an active generation.");
+          addConsoleMessage("Manual import may be required.");
+        }
+      },
+    );
+
+    return { queued: true, message: `Generating "${track.title}" — ${providerNote}.` };
+  }
+
   function handleCreateRelease(input: CreateReleaseInput) {
     const result = createRelease(input);
     if (result.release) {
@@ -570,6 +632,11 @@ function App() {
     selectProject(id);
   }
 
+  function openProjectStudio(id: string) {
+    setActiveSection("project-studio");
+    selectProject(id);
+  }
+
   // Opens Prompt Studio for one project — identical shape to
   // openMusicWorkspace, just landing on "prompt-studio" instead.
   function openPromptStudio(id: string) {
@@ -652,7 +719,7 @@ function App() {
     const blueprint = BLUEPRINT_DEFINITIONS[blueprintId];
     if (blueprint.preferredWorkspace === "music") {
       setFirstBlueprintVisit({ projectId, blueprintId });
-      openMusicWorkspace(projectId);
+      openProjectStudio(projectId);
     }
   }
 
@@ -797,10 +864,13 @@ function App() {
         onRemoveExecution={removeExecution}
         plannedTracks={plannedTracks}
         onPlanTrack={planTrack}
+        onUpdateTrack={updateTrack}
         onRemoveTrack={removeTrack}
         onFinishTrack={finishTrack}
         onReopenTrack={reopenTrack}
         onOpenAlbumProduction={openAlbumProduction}
+        onOpenProjectStudio={openProjectStudio}
+        onSaveAndGenerateTrack={handleSaveAndGenerateTrack}
         selectedTrackId={selectedTrackId}
         onOpenTrackWorkspace={openTrackWorkspace}
         attributions={attributions}

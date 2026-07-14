@@ -65,6 +65,7 @@ export type WorkspaceSection =
   | "album-production"
   | "track-workspace"
   | "studio-library"
+  | "project-studio"
   | "settings";
 
 // The kinds of project Forge currently understands. A union type (instead
@@ -490,6 +491,7 @@ export interface PlannedTrack {
   identityId: string;
   projectId: string;
   title: string;
+  description?: string;
   createdAt: Date;
   completedAt?: Date;
 }

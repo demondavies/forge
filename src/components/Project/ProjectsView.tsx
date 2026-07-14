@@ -40,6 +40,7 @@ interface ProjectsViewProps {
   onOpenKnowledgeEntry: (id: string) => void;
   onOpenRelease: (id: string) => void;
   onOpenMusicWorkspace: (id: string) => void;
+  onOpenProjectStudio: (id: string) => void;
 }
 
 // The whole "Projects" section of the workspace. Normally this is a
@@ -69,6 +70,7 @@ function ProjectsView({
   onOpenKnowledgeEntry,
   onOpenRelease,
   onOpenMusicWorkspace,
+  onOpenProjectStudio,
 }: ProjectsViewProps) {
   const selectedProject = projects.find((project) => project.id === selectedProjectId) ?? null;
 
@@ -105,6 +107,7 @@ function ProjectsView({
         onOpenKnowledgeEntry={onOpenKnowledgeEntry}
         onOpenRelease={onOpenRelease}
         onOpenMusicWorkspace={() => onOpenMusicWorkspace(selectedProject.id)}
+        onOpenProjectStudio={() => onOpenProjectStudio(selectedProject.id)}
       />
     );
   }

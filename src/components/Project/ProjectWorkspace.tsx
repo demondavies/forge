@@ -70,6 +70,7 @@ interface ProjectWorkspaceProps {
   // Opens MusicWorkspaceView for this project (owned by Workspace.tsx —
   // see App.tsx's openMusicWorkspace).
   onOpenMusicWorkspace: () => void;
+  onOpenProjectStudio: () => void;
 }
 
 // A dedicated workspace for a single project — what you see after clicking
@@ -101,6 +102,7 @@ function ProjectWorkspace({
   onOpenKnowledgeEntry,
   onOpenRelease,
   onOpenMusicWorkspace,
+  onOpenProjectStudio,
 }: ProjectWorkspaceProps) {
   // Which tab is showing. Lives here (not lifted to App.tsx) because it's
   // purely local navigation inside a single project — nothing outside this
@@ -189,6 +191,9 @@ function ProjectWorkspace({
               music-shaped, so there's no separate "is this a song" check
               gating the second button. */}
           <div className="project-workspace-actions">
+            <button className="section-action-btn" onClick={onOpenProjectStudio}>
+              🎛️ Open Project Studio
+            </button>
             <button className="section-action-btn secondary" onClick={onOpenMusicWorkspace}>
               🎸 Open Music Workspace
             </button>

@@ -1,0 +1,590 @@
+/* Project Studio — three-column creative workspace.
+   Negative margin cancels the workspace's own padding (56px 64px) so
+   the studio layout sits full-bleed inside the workspace container. */
+
+.ps-root {
+  display: flex;
+  flex-direction: column;
+  margin: -56px -64px;
+  background: var(--color-bg, #0f0f0f);
+}
+
+/* ── Topbar ── */
+.ps-topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--color-border, #222);
+  flex-shrink: 0;
+  background: var(--color-surface, #151515);
+}
+
+.ps-back {
+  flex-shrink: 0;
+}
+
+.ps-project-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ps-project-type {
+  font-size: 0.75rem;
+  color: var(--color-text-muted, #888);
+  background: var(--color-border, #222);
+  padding: 2px 8px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+/* ── Three-column layout ── */
+.ps-layout {
+  display: grid;
+  grid-template-columns: 200px 1fr 260px;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* ── LEFT — track list ── */
+.ps-left {
+  border-right: 1px solid var(--color-border, #222);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--color-surface, #151515);
+  height: calc(100vh - 165px);
+}
+
+.ps-tracklist {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 0;
+}
+
+.ps-track-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  background: transparent;
+  color: var(--color-text, #e0e0e0);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.1s;
+  font-size: 0.82rem;
+}
+
+.ps-track-item:hover {
+  background: var(--color-border, #222);
+}
+
+.ps-track-item--active {
+  background: var(--color-accent-dim, rgba(255, 138, 26, 0.12));
+  border-left: 2px solid var(--color-accent, #ff8a1a);
+}
+
+.ps-track-item--done {
+  opacity: 0.5;
+}
+
+.ps-track-number {
+  font-size: 0.72rem;
+  color: var(--color-text-muted, #888);
+  min-width: 16px;
+  flex-shrink: 0;
+}
+
+.ps-track-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Status badges */
+.ps-track-badge {
+  font-size: 0.65rem;
+  padding: 1px 6px;
+  border-radius: 999px;
+  flex-shrink: 0;
+  font-weight: 500;
+}
+
+.ps-track-badge--pending {
+  background: var(--color-border, #2a2a2a);
+  color: var(--color-text-muted, #888);
+}
+
+.ps-track-badge--prompted {
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+}
+
+.ps-track-badge--generating {
+  background: rgba(234, 179, 8, 0.15);
+  color: #facc15;
+}
+
+.ps-track-badge--review {
+  background: rgba(168, 85, 247, 0.15);
+  color: #c084fc;
+}
+
+.ps-track-badge--approved {
+  background: rgba(34, 197, 94, 0.15);
+  color: #4ade80;
+}
+
+.ps-track-badge--done {
+  background: rgba(255, 138, 26, 0.15);
+  color: var(--color-accent, #ff8a1a);
+}
+
+.ps-add-track-btn {
+  border: none;
+  border-top: 1px solid var(--color-border, #222);
+  background: transparent;
+  color: var(--color-text-muted, #888);
+  padding: 10px 12px;
+  cursor: pointer;
+  font-size: 0.82rem;
+  text-align: left;
+  width: 100%;
+  transition: color 0.1s, background 0.1s;
+}
+
+.ps-add-track-btn:hover {
+  color: var(--color-text, #e0e0e0);
+  background: var(--color-border, #222);
+}
+
+/* ── CENTRE — track editor ── */
+.ps-center {
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  height: calc(100vh - 165px);
+}
+
+.ps-empty {
+  color: var(--color-text-muted, #888);
+  font-size: 0.9rem;
+  margin: 40px auto;
+  text-align: center;
+}
+
+/* Track header */
+.ps-track-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ps-track-title-btn {
+  border: none;
+  background: transparent;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--color-text, #e0e0e0);
+  cursor: pointer;
+  padding: 4px 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ps-track-title-btn:hover .ps-edit-hint {
+  opacity: 1;
+}
+
+.ps-edit-hint {
+  opacity: 0.3;
+  font-size: 0.85rem;
+  font-weight: 400;
+  transition: opacity 0.15s;
+}
+
+.ps-title-edit-row {
+  flex: 1;
+}
+
+.ps-title-input {
+  font-size: 1.2rem;
+  font-weight: 700;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--color-accent, #ff8a1a);
+  color: var(--color-text, #e0e0e0);
+  padding: 2px 0;
+  width: 100%;
+  outline: none;
+}
+
+.ps-track-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.ps-finish-btn,
+.ps-remove-btn {
+  font-size: 0.8rem;
+}
+
+/* Description */
+.ps-desc-row {
+  margin: -8px 0;
+}
+
+.ps-desc-textarea {
+  width: 100%;
+  background: var(--color-surface, #151515);
+  border: 1px solid var(--color-border, #222);
+  border-radius: 6px;
+  color: var(--color-text, #e0e0e0);
+  padding: 8px 10px;
+  font-size: 0.85rem;
+  resize: vertical;
+  min-height: 48px;
+  font-family: inherit;
+}
+
+.ps-desc-textarea::placeholder {
+  color: var(--color-text-muted, #888);
+}
+
+.ps-desc-textarea:focus {
+  outline: none;
+  border-color: var(--color-accent, #ff8a1a);
+}
+
+/* Prompt section */
+.ps-prompt-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--color-surface, #151515);
+  border: 1px solid var(--color-border, #222);
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.ps-prompt-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ps-section-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted, #888);
+  margin: 0;
+}
+
+.ps-version-select {
+  font-size: 0.78rem;
+  background: var(--color-bg, #0f0f0f);
+  border: 1px solid var(--color-border, #333);
+  color: var(--color-text, #e0e0e0);
+  padding: 3px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.ps-prompt-textarea {
+  width: 100%;
+  background: var(--color-bg, #0f0f0f);
+  border: 1px solid var(--color-border, #222);
+  border-radius: 6px;
+  color: var(--color-text, #e0e0e0);
+  padding: 10px 12px;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  resize: vertical;
+  font-family: inherit;
+  min-height: 100px;
+}
+
+.ps-prompt-textarea::placeholder {
+  color: var(--color-text-muted, #888);
+}
+
+.ps-prompt-textarea:focus {
+  outline: none;
+  border-color: var(--color-accent, #ff8a1a);
+}
+
+.ps-prompt-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.ps-generate-btn {
+  background: var(--color-accent, #ff8a1a);
+  color: #000;
+  border: none;
+  font-weight: 700;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.88rem;
+  transition: opacity 0.15s;
+}
+
+.ps-generate-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.ps-generate-btn:not(:disabled):hover {
+  opacity: 0.88;
+}
+
+.ps-generate-message {
+  font-size: 0.82rem;
+  color: var(--color-text-muted, #888);
+  margin: 0;
+}
+
+/* Console */
+.ps-console {
+  background: var(--color-surface, #151515);
+  border: 1px solid var(--color-border, #222);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.ps-console-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--color-border, #222);
+}
+
+.ps-console-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted, #888);
+}
+
+.ps-console-clear {
+  font-size: 0.75rem;
+  padding: 2px 8px;
+}
+
+.ps-console-messages {
+  padding: 10px 12px;
+  max-height: 120px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ps-console-line {
+  font-size: 0.8rem;
+  color: var(--color-text-muted, #888);
+  margin: 0;
+  font-family: monospace;
+}
+
+/* Candidates */
+.ps-candidates {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ps-no-candidates {
+  color: var(--color-text-muted, #888);
+  font-size: 0.85rem;
+}
+
+.ps-candidate {
+  background: var(--color-surface, #151515);
+  border: 1px solid var(--color-border, #222);
+  border-radius: 8px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: border-color 0.15s;
+}
+
+.ps-candidate--active {
+  border-color: var(--color-accent, #ff8a1a);
+}
+
+.ps-candidate-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ps-candidate-title {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.ps-candidate-badge--pending-review {
+  background: rgba(168, 85, 247, 0.15);
+  color: #c084fc;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+}
+
+.ps-candidate-badge--approved {
+  background: rgba(34, 197, 94, 0.15);
+  color: #4ade80;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+}
+
+.ps-candidate-badge--rejected {
+  background: rgba(239, 68, 68, 0.1);
+  color: #f87171;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+}
+
+.ps-candidate-playback {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ps-candidate-time {
+  font-size: 0.78rem;
+  color: var(--color-text-muted, #888);
+  font-variant-numeric: tabular-nums;
+}
+
+.ps-candidate-no-file {
+  font-size: 0.82rem;
+  color: var(--color-text-muted, #888);
+  margin: 0;
+}
+
+.ps-candidate-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.ps-candidate-promotions {
+  display: flex;
+  gap: 16px;
+}
+
+.ps-promotion-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: var(--color-text-muted, #888);
+  cursor: pointer;
+}
+
+.ps-candidate-notes {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ps-note-input {
+  font-size: 0.82rem;
+  background: var(--color-bg, #0f0f0f);
+  border: 1px solid var(--color-border, #222);
+  border-radius: 4px;
+  color: var(--color-text, #e0e0e0);
+  padding: 4px 8px;
+  width: 100%;
+}
+
+.ps-note-input:focus {
+  outline: none;
+  border-color: var(--color-accent, #ff8a1a);
+}
+
+.ps-notes-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.ps-note-item {
+  font-size: 0.78rem;
+  color: var(--color-text-muted, #888);
+}
+
+/* ── RIGHT — Producer Companion ── */
+.ps-right {
+  border-left: 1px solid var(--color-border, #222);
+  overflow-y: auto;
+  background: var(--color-surface, #151515);
+  display: flex;
+  flex-direction: column;
+}
+
+.ps-companion-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid var(--color-border, #222);
+  background: transparent;
+  color: var(--color-text, #e0e0e0);
+  padding: 12px 14px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: left;
+  flex-shrink: 0;
+}
+
+.ps-companion-toggle:hover {
+  background: var(--color-border, #222);
+}
+
+.ps-companion-empty {
+  padding: 16px;
+  font-size: 0.82rem;
+  color: var(--color-text-muted, #888);
+}
+
+/* The ProducerCompanionPanel itself renders inside ps-right */
+.ps-right .producer-companion {
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  padding: 14px;
+  flex: 1;
+}
