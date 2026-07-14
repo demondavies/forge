@@ -308,6 +308,27 @@
   cursor: pointer;
 }
 
+.ps-prompt-title-input {
+  width: 100%;
+  background: var(--color-bg, #0f0f0f);
+  border: 1px solid var(--color-border, #222);
+  border-radius: 6px;
+  color: var(--color-text, #e0e0e0);
+  padding: 6px 10px;
+  font-size: 0.82rem;
+  font-family: inherit;
+}
+
+.ps-prompt-title-input::placeholder {
+  color: var(--color-text-muted, #888);
+  font-style: italic;
+}
+
+.ps-prompt-title-input:focus {
+  outline: none;
+  border-color: var(--color-accent, #ff8a1a);
+}
+
 .ps-prompt-textarea {
   width: 100%;
   background: var(--color-bg, #0f0f0f);

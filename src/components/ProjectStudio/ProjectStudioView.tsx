@@ -135,6 +135,7 @@ function ProjectStudioView({
   const [descDraft, setDescDraft] = useState("");
   const [promptText, setPromptText] = useState("");
   const [generateMessage, setGenerateMessage] = useState<string | null>(null);
+  const [promptTitle, setPromptTitle] = useState("");
   const [showConsole, setShowConsole] = useState(false);
   const [companionOpen, setCompanionOpen] = useState(true);
   const [draftNotes, setDraftNotes] = useState<Record<string, string>>({});
@@ -166,10 +167,11 @@ function ProjectStudioView({
       setTitleDraft(activeTrack.title);
       setDescDraft(activeTrack.description ?? "");
       setEditingTitle(false);
+      setPromptTitle("");
     }
   }, [activeTrackId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Prompt versions attributed to the active track.
+  // Prompt versions attributed to the active track — used for version counting only.
   const trackPromptVersions = activeTrack
     ? knowledgeEntries
         .filter(
@@ -180,6 +182,17 @@ function ProjectStudioView({
         )
         .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
     : [];
+
+  // All saved prompts for the project — both PromptStudio versions and prompts
+  // saved directly from ProjectStudio (attributed to any track in this project).
+  const projectTrackIds = new Set(projectTracks.map((t) => t.id));
+  const allProjectPrompts = knowledgeEntries
+    .filter((e) => {
+      if (e.projectId === project.id && isPromptVersion(e)) return true;
+      const attrId = getAttributedTrackId(e.id);
+      return attrId !== null && projectTrackIds.has(attrId);
+    })
+    .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
 
   // Candidates for the active track via attribution chain.
   const trackAttributions = activeTrack
@@ -240,8 +253,8 @@ function ProjectStudioView({
 
   function handleSavePromptOnly() {
     if (!activeTrack || !promptText.trim()) return;
-    const existingVersionCount = trackPromptVersions.length;
-    const title = `${activeTrack.title} - Prompt v${existingVersionCount + 1}`;
+    const autoTitle = `${activeTrack.title} - Prompt v${trackPromptVersions.length + 1}`;
+    const title = promptTitle.trim() || autoTitle;
     const saveResult = onSaveKnowledge({
       title,
       insight: promptText.trim(),
@@ -251,6 +264,7 @@ function ProjectStudioView({
     if (saveResult.entry) {
       onAttributePrompt({ promptVersionId: saveResult.entry.id, trackId: activeTrack.id });
       setGenerateMessage(`Saved as "${title}".`);
+      setPromptTitle("");
     } else {
       setGenerateMessage(saveResult.error ?? "Could not save.");
     }
@@ -380,7 +394,7 @@ function ProjectStudioView({
               <div className="ps-prompt-section">
                 <div className="ps-prompt-header">
                   <h3 className="ps-section-title">Prompt</h3>
-                  {trackPromptVersions.length > 0 && (
+                  {allProjectPrompts.length > 0 && (
                     <select
                       className="ps-version-select"
                       defaultValue=""
@@ -389,8 +403,8 @@ function ProjectStudioView({
                         e.target.value = "";
                       }}
                     >
-                      <option value="">Load previous…</option>
-                      {[...trackPromptVersions].reverse().map((v) => (
+                      <option value="">Load saved…</option>
+                      {[...allProjectPrompts].reverse().map((v) => (
                         <option key={v.id} value={v.id}>
                           {v.title}
                         </option>
@@ -398,6 +412,13 @@ function ProjectStudioView({
                     </select>
                   )}
                 </div>
+                <input
+                  className="ps-prompt-title-input"
+                  type="text"
+                  placeholder="Prompt name (optional)…"
+                  value={promptTitle}
+                  onChange={(e) => setPromptTitle(e.target.value)}
+                />
                 <textarea
                   className="ps-prompt-textarea"
                   placeholder="Describe the sound you're going for — genre, mood, instruments, references…"
