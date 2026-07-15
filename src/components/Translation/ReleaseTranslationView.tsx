@@ -12,6 +12,7 @@ import type {
 import type { DiscoveryContext } from "../../hooks/relationshipDiscovery";
 import { buildReleaseManifest } from "../../hooks/releaseManifest";
 import { translateReleaseManifest, TRANSLATION_FORMAT_LABELS } from "../../hooks/translationEngine";
+import type { TranslationFormat } from "../../hooks/translationEngine";
 import "./Translation.css";
 
 interface ReleaseTranslationViewProps {
@@ -48,6 +49,7 @@ function ReleaseTranslationView({
   onBack,
 }: ReleaseTranslationViewProps) {
   const [copyMessage, setCopyMessage] = useState<string | null>(null);
+  const [format, setFormat] = useState<TranslationFormat>("landr");
 
   const discoveryContext: DiscoveryContext = {
     identities: [identity],
@@ -63,7 +65,6 @@ function ReleaseTranslationView({
   // only ever touches `manifest`, never the arrays above it directly —
   // exactly the discipline translationEngine.ts's own functions hold to.
   const manifest = buildReleaseManifest(release, project, identity, discoveryContext, activities);
-  const format = "json" as const;
   const translated = translateReleaseManifest(manifest, format);
 
   async function handleCopy() {
@@ -89,7 +90,17 @@ function ReleaseTranslationView({
         </p>
       </div>
 
-      <div className="translation-format-badge">{TRANSLATION_FORMAT_LABELS[format]}</div>
+      <div className="translation-format-picker">
+        {(Object.keys(TRANSLATION_FORMAT_LABELS) as TranslationFormat[]).map((f) => (
+          <button
+            key={f}
+            className={`translation-format-tab${f === format ? " active" : ""}`}
+            onClick={() => setFormat(f)}
+          >
+            {TRANSLATION_FORMAT_LABELS[f]}
+          </button>
+        ))}
+      </div>
 
       <textarea
         className="translation-output"

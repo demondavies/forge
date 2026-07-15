@@ -23,7 +23,7 @@ import type { ManifestField, ManifestFieldStatus, ReleaseManifest } from "./rele
 // or plugin object — there is exactly one true fact to represent (a
 // format's name) and a lookup table below is all "many formats" ever
 // needs.
-export type TranslationFormat = "json";
+export type TranslationFormat = "json" | "landr";
 
 // Display label per format — the single source both a future format picker
 // and this file's own dispatch table read from, mirroring
@@ -33,6 +33,7 @@ export type TranslationFormat = "json";
 // about ReleaseManifest, or any function already defined, needs to change.
 export const TRANSLATION_FORMAT_LABELS: Record<TranslationFormat, string> = {
   json: "release.json",
+  landr: "Landr submission",
 };
 
 // A field's value, translated honestly: present content passes through
@@ -116,6 +117,54 @@ export function translateToJson(manifest: ReleaseManifest): string {
   return JSON.stringify(document, null, 2);
 }
 
+// Maps a Project type to the Landr release type label.
+function landrReleaseType(projectType: string): string {
+  if (projectType === "Single") return "Single";
+  if (projectType === "EP") return "EP";
+  return "Album";
+}
+
+// The Landr distributor shape — exactly the fields Landr's submission form
+// asks for, derived entirely from the manifest. No new data is introduced;
+// anything Forge doesn't know yet is null rather than guessed.
+export function translateToLandr(manifest: ReleaseManifest): string {
+  const year = manifest.release.releaseDate.getFullYear();
+  const ownerName = fieldValue(manifest.artist);
+
+  const document = {
+    distributor: "Landr",
+    artist: ownerName,
+    release: {
+      title: fieldValue(manifest.releaseTitle),
+      type: landrReleaseType(manifest.project.type),
+      previously_released: false,
+      release_date_rule: "14 days from submission date",
+      copyright: fieldValue(manifest.copyright),
+    },
+    tracks: manifest.trackList.value.map((track) => ({
+      title: track.name,
+      title_language: "English",
+      genre: fieldValue(manifest.genre),
+      subgenre: fieldValue(manifest.subgenre),
+      explicit: manifest.explicit,
+      isrc: "landr_assigned",
+    })),
+    rights: {
+      composition_owner: ownerName,
+      master_recording_owner: ownerName,
+      year_of_composition: year,
+      year_of_recording: year,
+      label: null,
+    },
+    cover_art: {
+      path: fieldValue(manifest.coverArtPath),
+      spec: "1:1 square, 1500x1500px minimum, JPG or PNG",
+    },
+  };
+
+  return JSON.stringify(document, null, 2);
+}
+
 // Which function produces which format — the only place a format name is
 // ever mapped to the code that actually generates it. This is the exact
 // shape PARSE_BY_FORMAT (folderImport.ts) already proved for Import: a
@@ -126,6 +175,7 @@ export function translateToJson(manifest: ReleaseManifest): string {
 // Manifest Engine itself, would all stay exactly as they are today.
 const TRANSLATE_BY_FORMAT: Record<TranslationFormat, (manifest: ReleaseManifest) => string> = {
   json: translateToJson,
+  landr: translateToLandr,
 };
 
 // The one function anything outside this file ever calls. Deliberately

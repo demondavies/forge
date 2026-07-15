@@ -12,7 +12,7 @@ import QuickCaptureModal from "./components/CommandPalette/QuickCaptureModal";
 import ConnectToModal from "./components/Relationships/ConnectToModal";
 import ImportModal from "./components/Import/ImportModal";
 import FolderImportModal from "./components/Import/FolderImportModal";
-import { pickFolderAsImportSources, pickVaultAsImportSources, pickAudioFiles, revealInExplorer } from "./native/nativeFolderSource";
+import { pickFolderAsImportSources, pickVaultAsImportSources, pickAudioFiles, pickImageFile, revealInExplorer } from "./native/nativeFolderSource";
 import { useStudioResources } from "./hooks/useStudioResources";
 // Side-effect only: registers every real Execution Provider this build
 // includes (today, just the Suno Service Adapter) into the Execution
@@ -88,7 +88,7 @@ function App() {
   const { assets, allAssets, selectedAsset, selectAsset, createAsset, removeAsset } = useAssets(
     selectedIdentity?.id ?? null,
   );
-  const { releases, allReleases, selectedRelease, selectRelease, createRelease } = useReleases(
+  const { releases, allReleases, selectedRelease, selectRelease, createRelease, updateReleaseCoverArt } = useReleases(
     selectedIdentity?.id ?? null,
   );
   const { captures, allCaptures, selectedCapture, selectCapture, createCapture } = useCaptures(
@@ -646,6 +646,11 @@ function App() {
     selectRelease(id);
   }
 
+  async function handlePickReleaseCoverArt(releaseId: string) {
+    const path = await pickImageFile();
+    if (path) updateReleaseCoverArt(releaseId, path);
+  }
+
   // Blueprint Composition's one piece of transient, in-memory state — not
   // creative data, not persisted, not a new field on Project. It exists
   // only to let a Blueprint's preferences (which Creative Actions to
@@ -822,6 +827,7 @@ function App() {
         onSaveKnowledge={handleCaptureKnowledge}
         onOpenReleaseManifest={openReleaseManifest}
         onOpenReleaseTranslation={openReleaseTranslation}
+        onPickReleaseCoverArt={handlePickReleaseCoverArt}
         executions={executions}
         onQueueExecution={queueExecution}
         onRemoveExecution={removeExecution}

@@ -173,6 +173,7 @@ interface WorkspaceProps {
   // keyed by a release id rather than a project id, since a manifest is
   // always about one specific release.
   onOpenReleaseManifest: (id: string) => void;
+  onPickReleaseCoverArt: (id: string) => void;
   // Opens the Translation Engine's own view for one release (owned by
   // App.tsx) — see the "Export as release.json" button rendered alongside
   // ReleaseManifestView above. Same shape as onOpenReleaseManifest, one
@@ -332,6 +333,7 @@ function Workspace({
   onSaveKnowledge,
   onOpenReleaseManifest,
   onOpenReleaseTranslation,
+  onPickReleaseCoverArt,
   executions,
   onQueueExecution,
   onRemoveExecution,
@@ -793,6 +795,7 @@ function Workspace({
                 onOpenProject={onOpenProject}
                 onOpenAsset={onOpenAsset}
                 onOpenKnowledgeEntry={onOpenKnowledgeEntry}
+                onPickCoverArt={() => onPickReleaseCoverArt(selectedRelease.id)}
                 onBack={() => onOpenRelease(selectedRelease.id)}
               />
               {/* Translation Engine's one entry point — rendered here, as a

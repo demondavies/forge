@@ -48,6 +48,30 @@
   resize: vertical;
 }
 
+.translation-format-picker {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.translation-format-tab {
+  padding: 8px 16px;
+  border-bottom: 2px solid transparent;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.translation-format-tab:hover {
+  color: var(--color-text-primary);
+}
+
+.translation-format-tab.active {
+  border-color: var(--color-accent);
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
 .translation-actions {
   display: flex;
   gap: 10px;

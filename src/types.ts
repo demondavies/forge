@@ -258,6 +258,10 @@ export interface Release {
   releaseDate: Date;
   description: string;
   createdAt: Date;
+  genre: string;
+  subgenre: string;
+  explicit: boolean;
+  coverArtPath: string | null;
 }
 
 // The kinds of event Forge automatically records. Unlike every other type

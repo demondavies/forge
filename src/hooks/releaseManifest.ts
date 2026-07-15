@@ -63,6 +63,10 @@ export interface ReleaseManifest {
   soundAndStyle: ManifestField<string>;
   releaseNotes: ManifestField<KnowledgeEntry[]>;
   copyright: ManifestField<string>;
+  genre: ManifestField<string>;
+  subgenre: ManifestField<string>;
+  explicit: boolean;
+  coverArtPath: ManifestField<string>;
   completeFieldCount: number;
   totalFieldCount: number;
   completeness: "complete" | "incomplete";
@@ -127,6 +131,10 @@ export function buildReleaseManifest(
     identity.name.trim() ? `© ${release.releaseDate.getFullYear()} ${identity.name.trim()}` : "",
   );
 
+  const genre = textField("Genre", release.genre);
+  const subgenre = textField("Subgenre", release.subgenre);
+  const coverArtPath = textField("Cover Art", release.coverArtPath ?? "");
+
   const fields: { status: ManifestFieldStatus }[] = [
     artist,
     releaseTitle,
@@ -136,6 +144,9 @@ export function buildReleaseManifest(
     soundAndStyle,
     releaseNotes,
     copyright,
+    genre,
+    subgenre,
+    coverArtPath,
   ];
   const completeFieldCount = fields.filter((field) => field.status === "complete").length;
 
@@ -150,6 +161,10 @@ export function buildReleaseManifest(
     soundAndStyle,
     releaseNotes,
     copyright,
+    genre,
+    subgenre,
+    explicit: release.explicit,
+    coverArtPath,
     completeFieldCount,
     totalFieldCount: fields.length,
     completeness: completeFieldCount === fields.length ? "complete" : "incomplete",

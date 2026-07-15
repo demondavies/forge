@@ -115,6 +115,20 @@ export async function pickAudioFiles(): Promise<string[]> {
   return [result];
 }
 
+// ---- Image File Picker ----
+// Single-select file dialog filtered to common image formats. Returns the
+// selected path, or null if the creator cancels.
+export async function pickImageFile(): Promise<string | null> {
+  const result = await open({
+    directory: false,
+    multiple: false,
+    filters: [{ name: "Image", extensions: ["jpg", "jpeg", "png"] }],
+  });
+  if (!result) return null;
+  if (Array.isArray(result)) return result[0] ?? null;
+  return result;
+}
+
 // ---- Reveal in Explorer ----
 // Opens the system file manager and selects the given file — Windows
 // Explorer on Windows, Finder on macOS. Does not open the file itself.

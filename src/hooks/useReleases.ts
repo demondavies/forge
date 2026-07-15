@@ -12,6 +12,10 @@ function loadReleases(): Release[] {
         ...r,
         createdAt: new Date(r.createdAt as string),
         releaseDate: new Date(r.releaseDate as string),
+        genre: typeof r.genre === "string" ? r.genre : "",
+        subgenre: typeof r.subgenre === "string" ? r.subgenre : "",
+        explicit: typeof r.explicit === "boolean" ? r.explicit : false,
+        coverArtPath: typeof r.coverArtPath === "string" ? r.coverArtPath : null,
       }) as Release,
     );
   } catch {
@@ -30,6 +34,9 @@ export interface CreateReleaseInput {
   status: ReleaseStatus;
   releaseDate: string;
   description: string;
+  genre: string;
+  subgenre: string;
+  explicit: boolean;
 }
 
 // createRelease() can fail validation, so instead of throwing it returns
@@ -107,6 +114,10 @@ export function useReleases(activeIdentityId: string | null) {
       releaseDate: parseDateInputValue(input.releaseDate),
       description: input.description.trim(),
       createdAt: new Date(),
+      genre: input.genre.trim(),
+      subgenre: input.subgenre.trim(),
+      explicit: input.explicit,
+      coverArtPath: null,
     };
 
     // Functional update — guards against reading a stale `releases` value
@@ -116,14 +127,18 @@ export function useReleases(activeIdentityId: string | null) {
     return { error: null, release: newRelease };
   }
 
+  function updateReleaseCoverArt(id: string, path: string) {
+    setReleases((current) =>
+      current.map((r) => (r.id === id ? { ...r, coverArtPath: path } : r)),
+    );
+  }
+
   return {
     releases: releasesForActiveIdentity,
-    // The full, unfiltered list across every identity — needed by anything
-    // that searches globally (the Command Palette) rather than within just
-    // the active identity.
     allReleases: releases,
     selectedRelease,
     selectRelease,
     createRelease,
+    updateReleaseCoverArt,
   };
 }

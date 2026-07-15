@@ -29,6 +29,9 @@ function CreateReleaseModal({ isOpen, onClose, onCreate, projects }: CreateRelea
   // this on submit.
   const [releaseDate, setReleaseDate] = useState("");
   const [description, setDescription] = useState("");
+  const [genre, setGenre] = useState("");
+  const [subgenre, setSubgenre] = useState("");
+  const [explicit, setExplicit] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   function resetForm() {
@@ -38,6 +41,9 @@ function CreateReleaseModal({ isOpen, onClose, onCreate, projects }: CreateRelea
     setStatus(DEFAULT_RELEASE_STATUS);
     setReleaseDate("");
     setDescription("");
+    setGenre("");
+    setSubgenre("");
+    setExplicit(false);
     setError(null);
   }
 
@@ -49,7 +55,7 @@ function CreateReleaseModal({ isOpen, onClose, onCreate, projects }: CreateRelea
   }
 
   function handleCreate() {
-    const result = onCreate({ title, projectId, platform, status, releaseDate, description });
+    const result = onCreate({ title, projectId, platform, status, releaseDate, description, genre, subgenre, explicit });
 
     if (result.error) {
       setError(result.error);
@@ -168,6 +174,42 @@ function CreateReleaseModal({ isOpen, onClose, onCreate, projects }: CreateRelea
           onChange={(event) => setDescription(event.target.value)}
           rows={3}
         />
+      </div>
+
+      <div className="field">
+        <label className="field-label" htmlFor="release-genre">
+          Genre <span className="field-optional">(optional)</span>
+        </label>
+        <input
+          id="release-genre"
+          type="text"
+          placeholder="e.g. R&B/Soul"
+          value={genre}
+          onChange={(e) => setGenre(e.target.value)}
+        />
+      </div>
+
+      <div className="field">
+        <label className="field-label" htmlFor="release-subgenre">
+          Subgenre <span className="field-optional">(optional)</span>
+        </label>
+        <input
+          id="release-subgenre"
+          type="text"
+          placeholder="e.g. Contemporary R&B"
+          value={subgenre}
+          onChange={(e) => setSubgenre(e.target.value)}
+        />
+      </div>
+
+      <div className="field field-checkbox">
+        <input
+          id="release-explicit"
+          type="checkbox"
+          checked={explicit}
+          onChange={(e) => setExplicit(e.target.checked)}
+        />
+        <label htmlFor="release-explicit">Explicit content</label>
       </div>
 
       {error && <p className="field-error">{error}</p>}

@@ -30,6 +30,7 @@ interface ReleaseManifestViewProps {
   onOpenProject: (id: string) => void;
   onOpenAsset: (id: string) => void;
   onOpenKnowledgeEntry: (id: string) => void;
+  onPickCoverArt: () => void;
   onBack: () => void;
 }
 
@@ -80,6 +81,7 @@ function ReleaseManifestView({
   onOpenProject,
   onOpenAsset,
   onOpenKnowledgeEntry,
+  onPickCoverArt,
   onBack,
 }: ReleaseManifestViewProps) {
   const discoveryContext: DiscoveryContext = {
@@ -172,6 +174,32 @@ function ReleaseManifestView({
 
       <ManifestField label={manifest.copyright.label} status={manifest.copyright.status}>
         <p className="manifest-text-value">{manifest.copyright.value || "No copyright line yet."}</p>
+      </ManifestField>
+
+      <ManifestField label={manifest.genre.label} status={manifest.genre.status}>
+        <p className="manifest-text-value">{manifest.genre.value || "No genre set yet."}</p>
+      </ManifestField>
+
+      <ManifestField label={manifest.subgenre.label} status={manifest.subgenre.status}>
+        <p className="manifest-text-value">{manifest.subgenre.value || "No subgenre set yet."}</p>
+      </ManifestField>
+
+      <ManifestField label="Explicit" status="complete">
+        <p className="manifest-text-value">{manifest.explicit ? "Yes" : "No"}</p>
+      </ManifestField>
+
+      <ManifestField label={manifest.coverArtPath.label} status={manifest.coverArtPath.status}>
+        {manifest.coverArtPath.value ? (
+          <div className="manifest-cover-art">
+            <p className="manifest-text-value manifest-cover-art-path">{manifest.coverArtPath.value}</p>
+            <button className="secondary" onClick={onPickCoverArt}>Change file</button>
+          </div>
+        ) : (
+          <div className="manifest-cover-art">
+            <p className="manifest-text-value">No cover art file set yet.</p>
+            <button className="secondary" onClick={onPickCoverArt}>Set cover art file</button>
+          </div>
+        )}
       </ManifestField>
 
       <button className="detail-project-link" onClick={() => onOpenProject(project.id)}>
