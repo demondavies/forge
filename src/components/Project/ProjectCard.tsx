@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { Project } from "../../types";
 import { formatDate } from "../../utils/formatDate";
 
@@ -5,12 +6,38 @@ interface ProjectCardProps {
   project: Project;
   isSelected: boolean;
   onSelect: () => void;
+  onArchive?: () => void;
+  onUnarchive?: () => void;
+  onDelete?: () => void;
 }
 
-// A single project card, shown in the project list. Rendered as a <button>
-// (like IdentityCard) so it's clickable and focusable for free, and to
-// leave room for a "selected project" concept later without extra work.
-function ProjectCard({ project, isSelected, onSelect }: ProjectCardProps) {
+function ProjectCard({ project, isSelected, onSelect, onArchive, onUnarchive, onDelete }: ProjectCardProps) {
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+
+  function handleDelete(e: React.MouseEvent) {
+    e.stopPropagation();
+    if (confirmingDelete) {
+      onDelete?.();
+    } else {
+      setConfirmingDelete(true);
+    }
+  }
+
+  function handleCancelDelete(e: React.MouseEvent) {
+    e.stopPropagation();
+    setConfirmingDelete(false);
+  }
+
+  function handleArchive(e: React.MouseEvent) {
+    e.stopPropagation();
+    onArchive?.();
+  }
+
+  function handleUnarchive(e: React.MouseEvent) {
+    e.stopPropagation();
+    onUnarchive?.();
+  }
+
   return (
     <button
       className={`project-card${isSelected ? " selected" : ""}`}
@@ -19,9 +46,6 @@ function ProjectCard({ project, isSelected, onSelect }: ProjectCardProps) {
     >
       <div className="project-card-header">
         <h3 className="project-name">{project.name}</h3>
-        {/* The status text also becomes part of the CSS class name
-            (e.g. "status-released") so each stage can have its own colour
-            in Project.css without a lookup table in JS. */}
         <span className={`badge status-badge status-${project.status.toLowerCase()}`}>
           {project.status}
         </span>
@@ -35,6 +59,38 @@ function ProjectCard({ project, isSelected, onSelect }: ProjectCardProps) {
       <p className="project-description">
         {project.description || "No description yet."}
       </p>
+
+      <div className="project-card-actions">
+        {confirmingDelete ? (
+          <>
+            <span className="project-card-action-label">Delete permanently?</span>
+            <button className="project-card-action danger" onClick={handleDelete}>
+              Yes, delete
+            </button>
+            <button className="project-card-action" onClick={handleCancelDelete}>
+              Cancel
+            </button>
+          </>
+        ) : (
+          <>
+            {onArchive && (
+              <button className="project-card-action" onClick={handleArchive}>
+                Archive
+              </button>
+            )}
+            {onUnarchive && (
+              <button className="project-card-action" onClick={handleUnarchive}>
+                Unarchive
+              </button>
+            )}
+            {onDelete && (
+              <button className="project-card-action danger" onClick={handleDelete}>
+                Delete
+              </button>
+            )}
+          </>
+        )}
+      </div>
     </button>
   );
 }

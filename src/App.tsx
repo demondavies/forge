@@ -74,7 +74,7 @@ function App() {
   // searches across every identity at once; ConnectToModal's search reuses
   // the exact same matching function, but with the identity-scoped lists
   // instead (a Relationship can't span identities) — see below.
-  const { projects, allProjects, selectedProject, selectProject, createProject } = useProjects(
+  const { projects, archivedProjects, allProjects, selectedProject, selectProject, createProject, archiveProject, unarchiveProject, removeProject } = useProjects(
     selectedIdentity?.id ?? null,
   );
   const {
@@ -763,9 +763,13 @@ function App() {
         identities={identities}
         section={activeSection}
         projects={projects}
+        archivedProjects={archivedProjects}
         selectedProjectId={selectedProject?.id ?? null}
         onSelectProject={selectProject}
         onCreateProject={() => setIsCreateProjectOpen(true)}
+        onArchiveProject={archiveProject}
+        onUnarchiveProject={unarchiveProject}
+        onDeleteProject={removeProject}
         knowledgeEntries={knowledgeEntries}
         onCaptureKnowledge={() => setIsCaptureKnowledgeOpen(true)}
         selectedKnowledgeEntry={selectedKnowledgeEntry}

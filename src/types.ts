@@ -119,6 +119,7 @@ export interface Project {
   status: ProjectStatus;
   description: string;
   createdAt: Date;
+  archivedAt: Date | null;
 }
 
 // How a piece of knowledge was learned. A plain string union (like

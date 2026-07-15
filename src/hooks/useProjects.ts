@@ -9,7 +9,11 @@ function loadProjects(): Project[] {
     const raw = localStorage.getItem(PROJECTS_KEY);
     if (!raw) return [];
     return (JSON.parse(raw) as Array<Record<string, unknown>>).map(
-      (p) => ({ ...p, createdAt: new Date(p.createdAt as string) }) as Project,
+      (p) => ({
+        ...p,
+        createdAt: new Date(p.createdAt as string),
+        archivedAt: p.archivedAt ? new Date(p.archivedAt as string) : null,
+      }) as Project,
     );
   } catch {
     return [];
@@ -51,13 +55,16 @@ export function useProjects(activeIdentityId: string | null) {
     try { localStorage.setItem(PROJECTS_KEY, JSON.stringify(projects)); } catch {}
   }, [projects]);
 
-  // Only the projects that belong to the currently selected identity.
-  const projectsForActiveIdentity = projects.filter(
+  const identityProjects = projects.filter(
     (project) => project.identityId === activeIdentityId,
   );
 
+  // Only the projects that belong to the currently selected identity and are not archived.
+  const projectsForActiveIdentity = identityProjects.filter((p) => !p.archivedAt);
+  const archivedProjects = identityProjects.filter((p) => !!p.archivedAt);
+
   const selectedProject =
-    projectsForActiveIdentity.find((project) => project.id === selectedProjectId) ?? null;
+    identityProjects.find((project) => project.id === selectedProjectId) ?? null;
 
   // Accepts null so the Project Workspace's "Back to Projects" button can
   // clear the selection and return to the list, not just switch which
@@ -93,6 +100,7 @@ export function useProjects(activeIdentityId: string | null) {
       status: DEFAULT_PROJECT_STATUS,
       description: input.description.trim(),
       createdAt: new Date(),
+      archivedAt: null,
     };
 
     // Functional update — setProjects(current => ...) instead of
@@ -105,8 +113,26 @@ export function useProjects(activeIdentityId: string | null) {
     return { error: null, project: newProject };
   }
 
+  function archiveProject(id: string) {
+    setProjects((current) =>
+      current.map((p) => (p.id === id ? { ...p, archivedAt: new Date() } : p)),
+    );
+  }
+
+  function unarchiveProject(id: string) {
+    setProjects((current) =>
+      current.map((p) => (p.id === id ? { ...p, archivedAt: null } : p)),
+    );
+  }
+
+  function removeProject(id: string) {
+    setProjects((current) => current.filter((p) => p.id !== id));
+    if (selectedProjectId === id) setSelectedProjectId(null);
+  }
+
   return {
     projects: projectsForActiveIdentity,
+    archivedProjects,
     // The full, unfiltered list across every identity — needed by anything
     // that searches globally (the Command Palette) rather than within just
     // the active identity.
@@ -114,5 +140,8 @@ export function useProjects(activeIdentityId: string | null) {
     selectedProject,
     selectProject,
     createProject,
+    archiveProject,
+    unarchiveProject,
+    removeProject,
   };
 }

@@ -77,9 +77,13 @@ interface WorkspaceProps {
   identities: Identity[];
   section: WorkspaceSection;
   projects: Project[];
+  archivedProjects: Project[];
   selectedProjectId: string | null;
   onSelectProject: (id: string | null) => void;
   onCreateProject: () => void;
+  onArchiveProject: (id: string) => void;
+  onUnarchiveProject: (id: string) => void;
+  onDeleteProject: (id: string) => void;
   knowledgeEntries: KnowledgeEntry[];
   onCaptureKnowledge: () => void;
   selectedKnowledgeEntry: KnowledgeEntry | null;
@@ -273,9 +277,13 @@ function Workspace({
   identities,
   section,
   projects,
+  archivedProjects,
   selectedProjectId,
   onSelectProject,
   onCreateProject,
+  onArchiveProject,
+  onUnarchiveProject,
+  onDeleteProject,
   knowledgeEntries,
   onCaptureKnowledge,
   selectedKnowledgeEntry,
@@ -435,8 +443,12 @@ function Workspace({
           return (
             <ProjectsView
               projects={projects}
+              archivedProjects={archivedProjects}
               onSelectProject={onSelectProject}
               onCreateProject={onCreateProject}
+              onArchiveProject={onArchiveProject}
+              onUnarchiveProject={onUnarchiveProject}
+              onDeleteProject={onDeleteProject}
             />
           );
         })()}

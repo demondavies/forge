@@ -99,6 +99,61 @@
   color: var(--color-text-secondary);
 }
 
+.project-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.project-card-action-label {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  margin-right: 4px;
+}
+
+.project-card-action {
+  padding: 3px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.project-card-action:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+  color: var(--color-text-primary);
+}
+
+.project-card-action.danger {
+  border-color: rgba(239, 68, 68, 0.25);
+  color: #f87171;
+}
+
+.project-card-action.danger:hover {
+  border-color: rgba(239, 68, 68, 0.6);
+  color: #fca5a5;
+}
+
+.archived-projects-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.archived-projects-toggle {
+  align-self: flex-start;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  transition: color 0.15s ease;
+}
+
+.archived-projects-toggle:hover {
+  color: var(--color-text-primary);
+}
+
 /* ---- Project Workspace ----
    Shown instead of the project list once a project card is clicked. The
    .card-grid it uses for its summary tiles, and the .placeholder-card /
