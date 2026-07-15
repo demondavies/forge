@@ -72,11 +72,14 @@ function checkAvailability(): ProviderAvailability {
 function translateSunoOutputs(record: Record<string, unknown>): ProviderOutput[] {
   if (!Array.isArray(record.outputs)) return [];
 
+  const suffix = ["A", "B", "C", "D", "E", "F", "G", "H"];
   return record.outputs.map((rawOutput, index) => {
     const output = typeof rawOutput === "object" && rawOutput !== null ? (rawOutput as Record<string, unknown>) : {};
+    const baseTitle = typeof output.title === "string" ? output.title : `Suno Output`;
+    const label = suffix[index] ?? String(index + 1);
     return {
       externalId: typeof output.id === "string" ? output.id : `suno-output-${index}`,
-      title: typeof output.title === "string" ? output.title : `Suno Output ${index + 1}`,
+      title: `${baseTitle} — ${label}`,
     };
   });
 }
